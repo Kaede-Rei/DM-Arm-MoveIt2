@@ -1,0 +1,1 @@
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description/ament_cmake_environment_hooks/local_setup.sh
