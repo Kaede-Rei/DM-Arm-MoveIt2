@@ -1,4 +1,5 @@
-/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/urdf/dm_arm_description.urdf
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/urdf/dm_arm.ros2_control.xacro
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/urdf/dm_arm_description.urdf.xacro
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/finger_left.stl
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/base_link.stl
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/finger_right.stl

@@ -1,6 +1,6 @@
 set(_AMENT_PACKAGE_NAME "dm_arm_moveit_config")
 set(dm_arm_moveit_config_VERSION "0.3.0")
-set(dm_arm_moveit_config_MAINTAINER "Kaede Rei <kaerei@foxmail.com>")
+set(dm_arm_moveit_config_MAINTAINER "Kaede Rei <kaerei86@gmail.com>")
 set(dm_arm_moveit_config_BUILD_DEPENDS )
 set(dm_arm_moveit_config_BUILDTOOL_DEPENDS "ament_cmake")
 set(dm_arm_moveit_config_BUILD_EXPORT_DEPENDS )

@@ -256,6 +256,205 @@ ros2 pkg list | grep moveit
 -   **MoveIt Controllers：** `Auto` -> 均为 `FollowJointTrajectory`
 -   剩下个必填项为作者信息，按实际情况填即可
 -   在 `src/` 下新建 `<robot-name>_moveit_config/` 包用于存放生成的 SRDF，保存后构建并 `Source`
--   ``
+-   `ros2 launch dm_arm_moveit_config demo.launch.py` 验证
 
->   *如果 setup_assistant 加载 urdf file 时报错 QT 相关的错误，需要降级 ros-humble-rviz-common*
+>   -   *如果 setup_assistant 加载 urdf file 时报错 QT 相关的错误，需要降级 ros-humble-rviz-common*
+>   -   *如果仍然有 parameter 'robot_description_planning.joint_limits.joint1.max_velocity'*
+>       *has invalid type: expected [double] got [integer] 报错，则在 config/joint_limits.yaml*
+>       *里将整数补齐为浮点数后再构建并 Source*
+
+### 3.3.2. MoveIt Setup Assistant 其他可选选项
+
+
+
+### 3.3.3. 生成文件结构说明
+
+Setup Assistant 完成后会在 `<robot-name>_moveit_config/config/` 下生成以下关键文件，了解它们的作用有助于后续手动调整：
+
+| 文件                      | 作用                                       |
+| ------------------------- | ------------------------------------------ |
+| `<robot>.srdf`            | 规划组定义、碰撞豁免、预设姿态、末端执行器 |
+| `joint_limits.yaml`       | 关节速度/加速度上限，覆盖 URDF 中的值      |
+| `kinematics.yaml`         | IK 求解器配置（插件名、超时、搜索步长）    |
+| `ompl_planning.yaml`      | OMPL 规划器参数，默认使用 RRTConnect       |
+| `ros2_controllers.yaml`   | ros2_control 的 controller 定义            |
+| `moveit_controllers.yaml` | MoveIt 侧的 controller 接口配置            |
+| `moveit.rviz`             | RViz 预配置，含 MotionPlanning 插件        |
+
+### 3.3.4. kinematics.yaml 关键参数
+
+生成后可手动微调 `config/kinematics.yaml`，KDL 的两个参数影响 IK 成功率：
+
+```yaml
+arm:
+  kinematics_solver: kdl_kinematics_plugin/KDLKinematicsPlugin
+  kinematics_solver_search_resolution: 0.005   	# 搜索步长，越小越精确但越慢
+  kinematics_solver_timeout: 0.005             	# 单次 IK 超时（秒），复杂位姿可调到 0.05
+  kinematics_solver_attempts: 3               	# 超时后重试次数
+```
+
+如果 KDL 在某些奇异构型下 IK 频繁失败，可以将求解器换为 `trac_ik_kinematics_plugin/TRAC_IKKinematicsPlugin`（需额外安装 `ros-humble-trac-ik-kinematics-plugin`），参数格式相同，收敛性更好，对近奇异点的处理比 KDL 稳定
+
+### 3.3.5. 仿真与真实臂的切换
+
+Setup Assistant 生成的 `ros2_controllers.yaml` 默认使用 `mock_components/GenericSystem`（即 FakeSystem）用于仿真；切换到真实臂时**不需要重新跑 Setup Assistant**，只需替换 hardware interface：
+
+```yaml
+# 仿真（config/ros2_controllers.yaml 或 description 包内的 .ros2_control.xacro）
+ros2_control:
+  hardware:
+    plugin: mock_components/GenericSystem   # FakeSystem，纯仿真
+
+# 真实臂（后续重构硬件接口后替换为）
+ros2_control:
+  hardware:
+    plugin: dm_arm_hardware/DmHardwareInterface
+    # 其余 joint 定义、SRDF、Planning Group 完全不变
+```
+
+MoveIt 规划层（SRDF、kinematics.yaml、ompl_planning.yaml）与硬件接口完全解耦，切换硬件不影响规划配置
+
+### 3.3.6. mimic joint 处理
+
+`gripper_right` 在 URDF 中声明了 `<mimic joint="gripper_left">`，但 `mock_components/GenericSystem` 默认不处理 mimic 关系，仿真时两指可能不同步。在 `ros2_controllers.yaml` 的 gripper controller 下添加：
+
+```yaml
+gripper_controller:
+  ros__parameters:
+    joints:
+      - gripper_left
+    allow_partial_joints_goal: true
+```
+
+并在 description 包的 ros2_control 定义里给 `gripper_right` 加上 mimic 参数，或者使用 `joint_mimic_broadcaster` 插件转发状态，视后续硬件接口实现而定
+
+## 3.4. 纯 urdf 迁移为 xacro
+
+-   **目的：**把 `.urdf` 改为 `.urdf.xacro`，分离出 `dm_arm.ros2_control.xacro`，通过 launch 参数控制仿真/真实切换，方便后续维护和调试
+-   **改造步骤：**把 URDF 主文件改成 xacro 格式 -> 新建一个专门放 ros2_control 描述的 xacro 文件 -> 重新对 xacro 文件再配置一次 MoveIt Config 
+
+### 3.4.1.把 URDF 主文件改成 xacro 格式
+
+-   **重命名：** `mv <robot-name>_description.urdf <robot-name>_description.urdf.xacro`
+
+-   然后在文件**第二行**（`<robot>` 标签里）加上 xacro 命名空间声明：
+
+    ```xml
+    <!-- 原来 -->
+    <robot name="<robot-name>_description">
+    
+    <!-- 改为 -->
+    <robot name="<robot-name>_description" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    ```
+
+-   然后在文件**末尾** `</robot>` 前加两行，引入 ros2_control 描述：
+
+    ```bash
+    <!-- 引入 ros2_control 描述 -->
+      <xacro:arg name="use_fake_hardware" default="true"/>
+      <xacro:include filename="$(find <robot-name>_description)/urdf/<robot-name>.ros2_control.xacro"/>
+      <xacro:<robot-name>_ros2_control name="<robot-name>_hardware" use_fake_hardware="$(arg use_fake_hardware)"/>
+    
+    </robot>
+    ```
+
+### 3.4.2. 新建 \<robot-name\>.ros2_control.xacro
+
+在 `urdf/` 下新建文件并添加：
+
+```xml
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="<robot-name>_ros2_control" params="name use_fake_hardware:=true">
+
+    <ros2_control name="${name}" type="system">
+
+      <hardware>
+        <xacro:if value="${use_fake_hardware}">
+          <!-- 仿真模式：现阶段一直用这个 -->
+          <plugin>mock_components/GenericSystem</plugin>
+        </xacro:if>
+        <xacro:unless value="${use_fake_hardware}">
+          <!-- 真实硬件：以后实现了硬件接口再启用 -->
+          <plugin>dm_arm_hardware/DmHardwareInterface</plugin>
+          <param name="serial_port">/dev/ttyACM0</param>
+          <param name="baudrate">921600</param>
+          <param name="control_frequency">500.0</param>
+        </xacro:unless>
+      </hardware>
+
+      <!-- 以下关节名称必须与 URDF 里的 joint name 完全一致 -->
+      <joint name="joint1">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+      <joint name="joint2">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+      <joint name="joint3">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+      <joint name="joint4">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+      <joint name="joint5">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+      <joint name="joint6">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+      <joint name="gripper_left">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+    </ros2_control>
+  </xacro:macro>
+
+</robot>
+```
+
+### 3.4.3. 重复之前的操作配置 MoveIt Config
+
+
+

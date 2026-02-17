@@ -1,13 +1,13 @@
 moveit_setup_assistant_config:
   urdf:
     package: dm_arm_description
-    relative_path: urdf/dm_arm_description.urdf
+    relative_path: urdf/dm_arm_description.urdf.xacro
   srdf:
     relative_path: config/dm_arm_description.srdf
   package_settings:
     author_name: Kaede Rei
-    author_email: kaerei@foxmail.com
-    generated_timestamp: 1771326994
+    author_email: kaerei86@gmail.com
+    generated_timestamp: 1771340827
   control_xacro:
     command:
       - position
