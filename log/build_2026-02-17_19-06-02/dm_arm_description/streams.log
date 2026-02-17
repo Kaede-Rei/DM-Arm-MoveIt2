@@ -1,0 +1,89 @@
+[0.008s] Invoking command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_description -DCMAKE_INSTALL_PREFIX=/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description
+[0.119s] -- The C compiler identification is GNU 11.4.0
+[0.214s] -- The CXX compiler identification is GNU 11.4.0
+[0.222s] -- Detecting C compiler ABI info
+[0.285s] -- Detecting C compiler ABI info - done
+[0.289s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.289s] -- Detecting C compile features
+[0.290s] -- Detecting C compile features - done
+[0.292s] -- Detecting CXX compiler ABI info
+[0.360s] -- Detecting CXX compiler ABI info - done
+[0.365s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.366s] -- Detecting CXX compile features
+[0.366s] -- Detecting CXX compile features - done
+[0.369s] -- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.477s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.551s] -- Found urdf: 2.6.1 (/opt/ros/humble/share/urdf/cmake)
+[0.599s] -- Found xacro: 2.1.1 (/opt/ros/humble/share/xacro/cmake)
+[0.600s] -- Found robot_state_publisher: 3.0.3 (/opt/ros/humble/share/robot_state_publisher/cmake)
+[0.624s] -- Found rosidl_generator_c: 3.1.8 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.628s] -- Found rosidl_adapter: 3.1.8 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.637s] -- Found rosidl_generator_cpp: 3.1.8 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.649s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.660s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.709s] -- Found eigen3_cmake_module: 0.1.1 (/opt/ros/humble/share/eigen3_cmake_module/cmake)
+[0.710s] -- Found Eigen3: TRUE (found version "3.4.0") 
+[0.711s] -- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+[0.746s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.749s] -- Found rmw_cyclonedds_cpp: 1.3.4 (/opt/ros/humble/share/rmw_cyclonedds_cpp/cmake)
+[0.770s] -- Using RMW implementation 'rmw_cyclonedds_cpp' as default
+[0.778s] -- Looking for pthread.h
+[0.847s] -- Looking for pthread.h - found
+[0.847s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[0.909s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[0.909s] -- Found Threads: TRUE  
+[1.038s] -- Found ament_lint_auto: 0.12.14 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[1.101s] -- Added test 'flake8' to check Python code syntax and style conventions
+[1.101s] -- Added test 'lint_cmake' to check CMake code style
+[1.102s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[1.103s] -- Added test 'xmllint' to check XML markup files
+[1.104s] -- Configuring done
+[1.108s] -- Generating done
+[1.110s] -- Build files have been written to: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description
+[1.120s] Invoked command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_description -DCMAKE_INSTALL_PREFIX=/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description
+[1.121s] Invoking command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description -- -j16 -l16
+[1.161s] Invoked command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description -- -j16 -l16
+[1.170s] Invoking command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description
+[1.175s] -- Install configuration: ""
+[1.175s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/urdf
+[1.175s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/urdf/dm_arm_description.urdf
+[1.175s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes
+[1.175s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision
+[1.176s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/finger_left.stl
+[1.178s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/base_link.stl
+[1.180s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/finger_right.stl
+[1.182s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/link2.stl
+[1.193s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/link4-5.stl
+[1.198s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/link1.stl
+[1.208s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/link6-7.stl
+[1.216s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/link1-2.stl
+[1.217s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/collision/link5-6.stl
+[1.222s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual
+[1.223s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/finger_left.dae
+[1.224s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/link4-5.dae
+[1.233s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/link6-7.dae
+[1.241s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/link1-2.dae
+[1.242s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/link5-6.dae
+[1.245s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/link2.dae
+[1.250s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/finger_right.dae
+[1.252s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/base_link.dae
+[1.256s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/meshes/visual/link1.dae
+[1.265s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/launch
+[1.265s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/launch/display.launch.py
+[1.265s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/config
+[1.265s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/ament_index/resource_index/package_run_dependencies/dm_arm_description
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/ament_index/resource_index/parent_prefix_path/dm_arm_description
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/environment/ament_prefix_path.sh
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/environment/ament_prefix_path.dsv
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/environment/path.sh
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/environment/path.dsv
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/local_setup.bash
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/local_setup.sh
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/local_setup.zsh
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/local_setup.dsv
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/package.dsv
+[1.266s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/ament_index/resource_index/packages/dm_arm_description
+[1.267s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/cmake/dm_arm_descriptionConfig.cmake
+[1.267s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/cmake/dm_arm_descriptionConfig-version.cmake
+[1.267s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_description/share/dm_arm_description/package.xml
+[1.269s] Invoked command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_description

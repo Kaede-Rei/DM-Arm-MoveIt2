@@ -30,7 +30,7 @@ ros2 pkg list | grep moveit
 ## 2.1. 启动演示及配置插件
 
 -   终端输入 `ros2 launch moveit_resources_panda_moveit_config demo.launch.py` 启动机械臂演示：
--   <img src="MoveIt-Tutorials.assets/image-20260216110255042.png" alt="image-20260216110255042" style="zoom:50%;" />
+-   <img src="Tutorial.assets/image-20260216110255042.png" alt="image-20260216110255042" style="zoom:50%;" />
 -   `Add` 添加显示类型，一般基础的默认已存在，需要自行添加应用于 `MoveIt` 的主要是 `MotionPlanning`、`TF`、`Axes`
 
 ## 2.2. 显示类型
@@ -90,7 +90,9 @@ ros2 pkg list | grep moveit
     	└── <robot-name>_description.urdf.xacro		(如原来就有 urdf 则继续使用 .urdf)
     ```
 
-## 3.2. 机器人描述包并在 Rviz 里验证
+>   *注意 urdf 里所有参数都要用浮点数，原 MoveIt1 可用而 MoveIt2 不可用*
+
+## 3.2. 机器人描述包 + Rviz 验证
 
 -   **创建描述包：** 
 
@@ -169,6 +171,63 @@ ros2 pkg list | grep moveit
 -   **添加 display.launch.py：**
 
     ```python
+    from launch import LaunchDescription
+    from launch.substitutions import Command, PathJoinSubstitution
+    from launch_ros.actions import Node
+    from launch_ros.substitutions import FindPackageShare
+    
+    URDF_PATH = "dm_arm_description.urdf"
+    
+    
+    def generate_launch_description():
+        # 查找包路径
+        pkg_share = FindPackageShare("dm_arm_description").find("dm_arm_description")
+    
+        # URDF 文件路径
+        urdf_path = PathJoinSubstitution([pkg_share, "urdf", URDF_PATH])
+    
+        # 判断是否使用 xacro
+        use_xacro = True if URDF_PATH.endswith(".xacro") else False
+    
+        return LaunchDescription(
+            [
+                # 从 URDF 加载并发布 robot_description
+                Node(
+                    package="robot_state_publisher",
+                    executable="robot_state_publisher",
+                    name="robot_state_publisher",
+                    output="screen",
+                    parameters=[
+                        {
+                            "robot_description": (
+                                Command(["xacro ", urdf_path])
+                                if use_xacro
+                                else Command(["cat ", urdf_path])
+                            )
+                        }
+                    ],
+                ),
+                # 启动 joint_state_publisher_gui
+                Node(
+                    package="joint_state_publisher_gui",
+                    executable="joint_state_publisher_gui",
+                    name="joint_state_publisher_gui",
+                    output="screen",
+                ),
+                # 启动 RViz 并加载配置
+                Node(
+                    package="rviz2",
+                    executable="rviz2",
+                    name="rviz2",
+                    output="screen",
+                    arguments=[
+                        "-d",
+                        PathJoinSubstitution([pkg_share, "config", "view_robot.rviz"]),
+                    ],
+                ),
+            ]
+        )
+    
     ```
 
 -   **构建并 source：** `colcon build --symlink-install --packages-select <robot-name>_description`
@@ -181,3 +240,22 @@ ros2 pkg list | grep moveit
 
         >   *如果没显示则是未及时更新，可点一下其他选项刷新*
 
+## 3.3. MoveIt Config 包
+
+### 3.3.1. MoveIt Setup Assistant
+
+-   **启动：** `ros2 launch moveit_setup_assistant setup_assistant.launch.py`
+-   **新建：** `Create New` -> `Browse` -> `<robot-name>_description.urdf` -> `Load File`
+-   **Self-Collisions：** `Generate Collision Matirx`
+-   **Planning Groups：** `Add Group`
+    -   **arm：** `KDL` -> `RRTConnect` -> `Add Kin. Chain` (`base_link` -> `link_tcp` 即底座 - 末端工作点)
+    -   **gripper：** `Add Joints` -> `gripper_left` （`gripper_right` 是 mimic joint 不需要加进来）
+-   **Robot Poses：** `Add` -> `home`
+-   **End Effectors：** `Add` -> `Name=gripper` -> `Group=gripper` -> `Link=link_tcp` -> `Parent=arm`
+-   **ROS2 Controllers：** `Auto` -> 均为 `joint_trajectory_controller/JointTrajectoryController`
+-   **MoveIt Controllers：** `Auto` -> 均为 `FollowJointTrajectory`
+-   剩下个必填项为作者信息，按实际情况填即可
+-   在 `src/` 下新建 `<robot-name>_moveit_config/` 包用于存放生成的 SRDF，保存后构建并 `Source`
+-   ``
+
+>   *如果 setup_assistant 加载 urdf file 时报错 QT 相关的错误，需要降级 ros-humble-rviz-common*
