@@ -252,8 +252,14 @@ ros2 pkg list | grep moveit
     -   **gripper：** `Add Joints` -> `gripper_left` （`gripper_right` 是 mimic joint 不需要加进来）
 -   **Robot Poses：** `Add` -> `home`
 -   **End Effectors：** `Add` -> `Name=gripper` -> `Group=gripper` -> `Link=link_tcp` -> `Parent=arm`
--   **ROS2 Controllers：** `Auto` -> 均为 `joint_trajectory_controller/JointTrajectoryController`
--   **MoveIt Controllers：** `Auto` -> 均为 `FollowJointTrajectory`
+-   **ROS2 Controllers：** `Auto` 
+    -   **arm：** `joint_trajectory_controller/JointTrajectoryController`
+    -   **gripper：** `position_controllers/GripperActionController`
+
+-   **MoveIt Controllers：** `Auto`
+    -   **arm：** `FollowJointTrajectory`
+    -   **gripper：** `GripperCommand`
+
 -   剩下个必填项为作者信息，按实际情况填即可
 -   在 `src/` 下新建 `<robot-name>_moveit_config/` 包用于存放生成的 SRDF，保存后构建并 `Source`
 -   `ros2 launch dm_arm_moveit_config demo.launch.py` 验证
@@ -415,4 +421,100 @@ gripper_controller:
 ### 3.4.3. 重复之前的操作配置 MoveIt Config
 
 
+
+# 4. 基础空间规划
+
+## 4.1. 设置目标关节角度
+
+### 4.1.1. 依赖
+
+```xml
+    <depend>rclcpp</depend>
+    <depend>moveit_ros_planning_interface</depend>
+```
+
+-   **VSCode 路径：**Ctrl + Shift + P 并输入 `C/C++` 选择编辑配置(JSON)：
+
+    ```json
+                "includePath": [
+                    "${workspaceFolder}/**",
+                    "/opt/ros/humble/include/**",
+                    "/usr/include/**"
+                ],
+    ```
+
+-   **include：** `#include <rclcpp/rclcpp.hpp>`  `#include <moveit/move_group_interface/move_group_interface.h>`
+
+### 4.1.2. 步骤与 API
+
+-   **步骤：** `新建节点` -> `单开线程并 Node Spin` -> `创建 MoveGroupInterface 对象` -> `设置目标关节+规划执行`
+
+-   **API：**
+
+    ```cpp
+    # 节点
+    auto node = rclcpp::Node::make_shared("end_effector_cmd");
+    
+    # 线程
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
+    std::thread spin_thread([&executor]() { executor.spin(); });
+    
+    # MoveGroupInterface 对象
+    moveit::planning_interface::MoveGroupInterface arm(node, "arm");
+    
+    # 获取关节角与关节名称
+    std::vector<double> current_joints = arm.getCurrentJointValues();
+    std::vector<std::string> joint_names = arm.getJointNames();
+    
+    # 设置目标关节角
+    bool success = arm.setJointValueTarget(target_joints);
+    
+    # 规划
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    moveit::core::MoveItErrorCode err_code = arm.plan(plan);
+    
+    # 执行
+    err_code = arm.execute(plan);
+    
+    # 关闭节点 + 终止线程
+    rclcpp::shutdown();
+    spin_thread.join();
+    ```
+
+## 4.2. 设置目标位姿
+
+### 4.2.1. 传入 MoveIt2 所有配置参数：
+
+-   在 MoveIt 2 (ROS 2) 中，**全局参数服务器（Parameter Server）已不存在**；每个节点都是独立的实体，必须在启动时显式获取其所需的全部上下文参数：
+
+    ```python
+    # run.
+    from launch import LaunchDescription
+    from launch_ros.actions import Node
+    from moveit_configs_utils import MoveItConfigsBuilder
+    
+    
+    def generate_launch_description():
+        # 构建 MoveIt 配置
+        moveit_config = MoveItConfigsBuilder(
+            "dm_arm_description", package_name="dm_arm_moveit_config"
+        ).to_moveit_configs()
+    
+        # 创建节点并传入 moveit_config.to_dict()
+        node = Node(
+            package="dm_arm_controller",
+            executable="end_effector_cmd",
+            output="screen",
+            parameters=[
+                moveit_config.to_dict(),
+                {"use_sim_time": True},
+            ],
+        )
+    
+        return LaunchDescription([node])
+    
+    ```
+
+    
 

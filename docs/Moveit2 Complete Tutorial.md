@@ -20,11 +20,11 @@ MoveIt2 的核心设计思想是**分层解耦**，将机器人控制分为三�
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  应用层 (Your Application)                                    │
+│  应用层 (Your Application)                                   │
 │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
-│  • MoveGroupInterface           (C++ API)                    │
-│  • Python API                                                │
-│  • dm_arm_server                (本项目服务层封装)            │
+│  • MoveGroupInterface           (C++ API)                   │
+│  • Python API                                               │
+│  • dm_arm_server                (本项目服务层封装)             │
 └─────────────────────────────────────────────────────────────┘
                              ↓ ↑
                   (Goal / Feedback / Result)
@@ -38,44 +38,44 @@ MoveIt2 的核心设计思想是**分层解耦**，将机器人控制分为三�
 │  │  FixStartStateBounds → FixWorkspaceBounds →           │  │
 │  │  FixStartStateCollision → FixStartStatePathConstraints│  │
 │  └───────────────────────────────────────────────────────┘  │
-│                          ↓                                   │
+│                          ↓                                  │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │ PlanningPipeline                                      │  │
 │  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │  │
-│  │  • OMPL Planner (RRTConnect/RRTstar/PRM/...)         │  │
-│  │  • Pilz Industrial Planner (PTP/LIN/CIRC)            │  │
-│  │  • CHOMP / STOMP (轨迹优化)                           │  │
+│  │  • OMPL Planner (RRTConnect/RRTstar/PRM/...)          │  │
+│  │  • Pilz Industrial Planner (PTP/LIN/CIRC)             │  │
+│  │  • CHOMP / STOMP (轨迹优化)                             │  │
 │  └───────────────────────────────────────────────────────┘  │
-│                          ↓                                   │
+│                          ↓                                  │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │ TrajectoryProcessing                                  │  │
 │  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │  │
 │  │  IterativeParabolicTimeParameterization               │  │
-│  │   (为路径添加速度/加速度/时间戳)                       │  │
+│  │   (为路径添加速度/加速度/时间戳)                       	   │  │
 │  └───────────────────────────────────────────────────────┘  │
-│                          ↓                                   │
+│                          ↓                                  │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │ TrajectoryExecutionManager                            │  │
 │  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │  │
-│  │  • 查找控制器 (moveit_controllers.yaml)               │  │
-│  │  • 验证轨迹 (关节限位、速度限制)                       │  │
-│  │  • 发送 FollowJointTrajectory Action                  │  │
-│  │  • 监控执行状态 (超时/碰撞/抢占)                       │  │
+│  │  • 查找控制器 (moveit_controllers.yaml)                 │  │
+│  │  • 验证轨迹 (关节限位、速度限制)                           │  │
+│  │  • 发送 FollowJointTrajectory Action                   │  │
+│  │  • 监控执行状态 (超时/碰撞/抢占)                           │  │
 │  └───────────────────────────────────────────────────────┘  │
-│                                                              │
+│                                                             │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │ PlanningSceneMonitor                                  │  │
 │  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │  │
-│  │  • 订阅 /joint_states (关节状态)                      │  │
-│  │  │  订阅 /planning_scene (场景差量更新)               │  │
-│  │  • 订阅 /collision_object (障碍物)                    │  │
-│  │  • 订阅 /attached_collision_object (附着物)           │  │
-│  │  • TF 监听器 (坐标系变换)                             │  │
+│  │  • 订阅 /joint_states (关节状态)                        │  │
+│  │  │  订阅 /planning_scene (场景差量更新)                  │  │
+│  │  • 订阅 /collision_object (障碍物)                      │  │
+│  │  • 订阅 /attached_collision_object (附着物)             │  │
+│  │  • TF 监听器 (坐标系变换)                                │  │
 │  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │  │
-│  │  → PlanningScene (线程安全的世界模型)                 │  │
+│  │  → PlanningScene (线程安全的世界模型)                    │  │
 │  │     • RobotModel (URDF + SRDF 解析)                   │  │
-│  │     • RobotState (当前关节状态 + FK/IK)               │  │
-│  │     • CollisionWorld (障碍物八叉树)                   │  │
+│  │     • RobotState (当前关节状态 + FK/IK)                 │  │
+│  │     • CollisionWorld (障碍物八叉树)                     │  │
 │  │     • AllowedCollisionMatrix (ACM)                    │  │
 │  └───────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
@@ -393,97 +393,92 @@ dm_arm_examples/
 `src/01_move_to_joint_target.cpp`：
 
 ```cpp
+#include "dm_arm_controller/end_effector_cmd.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/move_group_interface/move_group_interface.h>
 
-int main(int argc, char** argv)
-{
-  // ── 1. 初始化 ROS2 ────────────────────────────────────────────
-  rclcpp::init(argc, argv);
+// ! ========================= 变 量 声 明 ========================= ! //
 
-  // ── 2. 创建节点 ───────────────────────────────────────────────
-  // 注意：Node 必须在 MoveGroupInterface 之前创建
-  auto node = rclcpp::Node::make_shared("move_to_joint_target");
 
-  // 日志输出节点名
-  RCLCPP_INFO(node->get_logger(), "Node started: move_to_joint_target");
 
-  // ── 3. 创建 MoveGroupInterface ────────────────────────────────
-  // 第一个参数：node（ROS2 必须传入，ROS1 不需要）
-  // 第二个参数：规划组名（来自 SRDF <group name="arm">）
-  moveit::planning_interface::MoveGroupInterface arm(node, "arm");
+// ! ========================= 私 有 函 数 声 明 ========================= ! //
 
-  // 打印基本信息（验证初始化成功）
-  RCLCPP_INFO(node->get_logger(), "Planning frame: %s",
-    arm.getPlanningFrame().c_str());  // 预期输出: base_link
-  RCLCPP_INFO(node->get_logger(), "End effector: %s",
-    arm.getEndEffectorLink().c_str()); // 预期输出: link_tcp
+static void shutdown_thread(std::thread& spin_thread);
 
-  // ── 4. 设置关节空间目标 ───────────────────────────────────────
-  // 获取当前关节值（用于对比）
-  std::vector<double> current_joints = arm.getCurrentJointValues();
-  RCLCPP_INFO(node->get_logger(), "Current joints:");
-  for (size_t i = 0; i < current_joints.size(); ++i) {
-    RCLCPP_INFO(node->get_logger(), "  joint%zu: %.3f rad (%.1f deg)",
-      i+1, current_joints[i], current_joints[i] * 180.0 / M_PI);
-  }
+// ! ========================= 接 口 函 数 实 现 ========================= ! //
 
-  // 设置目标关节值（单位：弧度）
-  // 顺序必须与 arm.getJointNames() 返回顺序一致
-  // dm_arm: [joint1, joint2, joint3, joint4, joint5, joint6]
-  std::vector<double> target_joints = {
-    0.0,    // joint1: 0°（基座旋转）
-    0.5,    // joint2: 28.6°（肩关节抬起）
-    1.0,    // joint3: 57.3°（肘关节弯曲）
-    0.0,    // joint4: 0°（腕关节roll）
-    0.0,    // joint5: 0°（腕关节pitch）
-    0.0     // joint6: 0°（腕关节yaw）
-  };
+int main(int argc, char** argv) {
+    rclcpp::init(argc, argv);
 
-  bool success = arm.setJointValueTarget(target_joints);
-  if (!success) {
-    RCLCPP_ERROR(node->get_logger(), "Failed to set joint target (out of bounds?)");
-    rclcpp::shutdown();
-    return 1;
-  }
+    auto node = rclcpp::Node::make_shared("end_effector_cmd");
+    RCLCPP_INFO(node->get_logger(), "节点：end_effector_cmd 已启动");
 
-  // ── 5. 规划 ───────────────────────────────────────────────────
-  RCLCPP_INFO(node->get_logger(), "Planning to target...");
+    // 需要让开线程让节点 spin 来实时更新状态
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
+    std::thread spin_thread([&executor]() { executor.spin(); });
 
-  moveit::planning_interface::MoveGroupInterface::Plan plan;
-  moveit::core::MoveItErrorCode error_code = arm.plan(plan);
+    // 创建 MoveGroupInterface 对象，指定控制的机械臂组名称
+    moveit::planning_interface::MoveGroupInterface arm(node, "arm");
+    RCLCPP_INFO(node->get_logger(), "Planning Frame - %s 已创建", arm.getPlanningFrame().c_str());
+    RCLCPP_INFO(node->get_logger(), "End Effector Link - %s 已创建", arm.getEndEffectorLink().c_str());
 
-  // 检查规划结果
-  if (error_code != moveit::core::MoveItErrorCode::SUCCESS) {
-    RCLCPP_ERROR(node->get_logger(), "Planning failed with error code: %d",
-      error_code.val);
-    rclcpp::shutdown();
-    return 1;
-  }
+    // 获取当前关节值并打印
+    std::vector<double> current_joints = arm.getCurrentJointValues();
+    std::vector<std::string> joint_names = arm.getJointNames();
+    RCLCPP_INFO(node->get_logger(), "当前关节值：");
+    for(size_t i = 0; i < current_joints.size(); ++i) {
+        RCLCPP_INFO(node->get_logger(), "%s: %f", joint_names[i].data(), current_joints[i]);
+    }
 
-  RCLCPP_INFO(node->get_logger(), "Planning succeeded! Planning time: %.2f sec",
-    plan.planning_time_);
-  RCLCPP_INFO(node->get_logger(), "Trajectory has %zu waypoints",
-    plan.trajectory_.joint_trajectory.points.size());
+    // 设置目标关节值
+    std::vector<double> target_joints = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    bool success = arm.setJointValueTarget(target_joints);
+    RCLCPP_INFO(node->get_logger(), "设置目标关节值是否成功：%s", success ? "是" : "否");
+    if(!success) {
+        shutdown_thread(spin_thread);
+        return 1;
+    }
 
-  // ── 6. 执行 ───────────────────────────────────────────────────
-  RCLCPP_INFO(node->get_logger(), "Executing trajectory...");
+    // 规划
+    RCLCPP_INFO(node->get_logger(), "正在规划...");
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    moveit::core::MoveItErrorCode err_code = arm.plan(plan);
+    if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
+        RCLCPP_ERROR(node->get_logger(), "规划失败，错误码：%d", err_code.val);
+        shutdown_thread(spin_thread);
+        return 1;
+    }
 
-  error_code = arm.execute(plan);
+    // 执行
+    RCLCPP_INFO(node->get_logger(), "规划成功，正在执行...");
+    err_code = arm.execute(plan);
+    if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
+        RCLCPP_ERROR(node->get_logger(), "执行失败，错误码：%d", err_code.val);
+        shutdown_thread(spin_thread);
+        return 1;
+    }
 
-  if (error_code != moveit::core::MoveItErrorCode::SUCCESS) {
-    RCLCPP_ERROR(node->get_logger(), "Execution failed with error code: %d",
-      error_code.val);
-    rclcpp::shutdown();
-    return 1;
-  }
+    RCLCPP_INFO(node->get_logger(), "执行成功，目标位置已达成");
+    shutdown_thread(spin_thread);
 
-  RCLCPP_INFO(node->get_logger(), "Execution succeeded!");
-
-  // ── 7. 清理 ───────────────────────────────────────────────────
-  rclcpp::shutdown();
-  return 0;
+    return 0;
 }
+
+// ! ========================= 私 有 函 数 实 现 ========================= ! //
+
+/**
+ * @brief 安全地关闭 ROS 2 节点并等待 spin 线程结束
+ * @param spin_thread 负责节点 spin 的线程
+ */
+static void shutdown_thread(std::thread& spin_thread) {
+    rclcpp::shutdown();
+    if(spin_thread.joinable()) {
+        spin_thread.join();
+    }
+}
+
 ```
 
 ---
