@@ -4,14 +4,14 @@
     <xacro:macro name="dm_arm_ros2_control" params="name use_fake_hardware:=true">
 
         <ros2_control name="${name}" type="system">
-
+            <!-- 硬件插件选择 -->
             <hardware>
+                <!-- 仿真模式 -->
                 <xacro:if value="${use_fake_hardware}">
-                    <!-- 仿真模式：现阶段一直用这个 -->
                     <plugin>mock_components/GenericSystem</plugin>
                 </xacro:if>
+                <!-- 真实硬件模式 -->
                 <xacro:unless value="${use_fake_hardware}">
-                    <!-- 真实硬件：以后实现了硬件接口再启用 -->
                     <plugin>dm_arm_hardware/DmHardwareInterface</plugin>
                     <param name="serial_port">/dev/ttyACM0</param>
                     <param name="baudrate">921600</param>
@@ -19,7 +19,7 @@
                 </xacro:unless>
             </hardware>
 
-            <!-- 以下关节名称必须与 URDF 里的 joint name 完全一致 -->
+            <!-- 关节名称（必须与 URDF 里的 joint name 一致） -->
             <joint name="joint1">
                 <command_interface name="position"/>
                 <state_interface name="position">
@@ -28,7 +28,6 @@
                 <state_interface name="velocity"/>
                 <state_interface name="effort"/>
             </joint>
-
             <joint name="joint2">
                 <command_interface name="position"/>
                 <state_interface name="position">
@@ -37,7 +36,6 @@
                 <state_interface name="velocity"/>
                 <state_interface name="effort"/>
             </joint>
-
             <joint name="joint3">
                 <command_interface name="position"/>
                 <state_interface name="position">
@@ -46,7 +44,6 @@
                 <state_interface name="velocity"/>
                 <state_interface name="effort"/>
             </joint>
-
             <joint name="joint4">
                 <command_interface name="position"/>
                 <state_interface name="position">
@@ -55,7 +52,6 @@
                 <state_interface name="velocity"/>
                 <state_interface name="effort"/>
             </joint>
-
             <joint name="joint5">
                 <command_interface name="position"/>
                 <state_interface name="position">
@@ -64,7 +60,6 @@
                 <state_interface name="velocity"/>
                 <state_interface name="effort"/>
             </joint>
-
             <joint name="joint6">
                 <command_interface name="position"/>
                 <state_interface name="position">
@@ -73,7 +68,6 @@
                 <state_interface name="velocity"/>
                 <state_interface name="effort"/>
             </joint>
-
             <joint name="gripper_left">
                 <command_interface name="position"/>
                 <state_interface name="position">
@@ -82,8 +76,8 @@
                 <state_interface name="velocity"/>
                 <state_interface name="effort"/>
             </joint>
-
         </ros2_control>
+
     </xacro:macro>
 
 </robot>

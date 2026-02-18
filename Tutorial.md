@@ -323,10 +323,13 @@ gripper_controller:
   ros__parameters:
     joints:
       - gripper_left
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
     allow_partial_joints_goal: true
 ```
-
-并在 description 包的 ros2_control 定义里给 `gripper_right` 加上 mimic 参数，或者使用 `joint_mimic_broadcaster` 插件转发状态，视后续硬件接口实现而定
 
 ## 3.4. 纯 urdf 迁移为 xacro
 
@@ -335,7 +338,7 @@ gripper_controller:
 
 ### 3.4.1.把 URDF 主文件改成 xacro 格式
 
--   **重命名：** `mv <robot-name>_description.urdf <robot-name>_description.urdf.xacro`
+-   **重命名：** `<robot-name>_description.urdf.xacro`
 
 -   然后在文件**第二行**（`<robot>` 标签里）加上 xacro 命名空间声明：
 
@@ -366,90 +369,45 @@ gripper_controller:
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="<robot-name>_ros2_control" params="name use_fake_hardware:=true">
+    <xacro:macro name="dm_arm_ros2_control" params="name use_fake_hardware:=true">
 
-    <ros2_control name="${name}" type="system">
+        <ros2_control name="${name}" type="system">
+            <!-- 硬件插件选择 -->
+            <hardware>
+                <!-- 仿真模式 -->
+                <xacro:if value="${use_fake_hardware}">
+                    <plugin>mock_components/GenericSystem</plugin>
+                </xacro:if>
+                <!-- 真实硬件模式 -->
+                <xacro:unless value="${use_fake_hardware}">
+                    <plugin>dm_arm_hardware/DmHardwareInterface</plugin>
+                    <param name="serial_port">/dev/ttyACM0</param>
+                    <param name="baudrate">921600</param>
+                    <param name="control_frequency">500.0</param>
+                </xacro:unless>
+            </hardware>
 
-      <hardware>
-        <xacro:if value="${use_fake_hardware}">
-          <!-- 仿真模式：现阶段一直用这个 -->
-          <plugin>mock_components/GenericSystem</plugin>
-        </xacro:if>
-        <xacro:unless value="${use_fake_hardware}">
-          <!-- 真实硬件：以后实现了硬件接口再启用 -->
-          <plugin>dm_arm_hardware/DmHardwareInterface</plugin>
-          <param name="serial_port">/dev/ttyACM0</param>
-          <param name="baudrate">921600</param>
-          <param name="control_frequency">500.0</param>
-        </xacro:unless>
-      </hardware>
+            <!-- 关节名称（必须与 URDF 里的 joint name 一致） -->
+            <joint name="joint1">
+                <command_interface name="position"/>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity"/>
+                <state_interface name="effort"/>
+            </joint>
+			<!-- joint2 ~ joint6 -->
+            <joint name="gripper_left">
+                <command_interface name="position"/>
+                <state_interface name="position">
+                    <param name="initial_value">0.0</param>
+                </state_interface>
+                <state_interface name="velocity"/>
+                <state_interface name="effort"/>
+            </joint>
+        </ros2_control>
 
-      <!-- 以下关节名称必须与 URDF 里的 joint name 完全一致 -->
-      <joint name="joint1">
-        <command_interface name="position"/>
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-      <joint name="joint2">
-        <command_interface name="position"/>
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-      <joint name="joint3">
-        <command_interface name="position"/>
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-      <joint name="joint4">
-        <command_interface name="position"/>
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-      <joint name="joint5">
-        <command_interface name="position"/>
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-      <joint name="joint6">
-        <command_interface name="position"/>
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-      <joint name="gripper_left">
-        <command_interface name="position"/>
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-    </ros2_control>
-  </xacro:macro>
+    </xacro:macro>
 
 </robot>
 ```
