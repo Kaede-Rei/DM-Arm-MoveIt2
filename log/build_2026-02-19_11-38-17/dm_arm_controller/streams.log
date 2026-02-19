@@ -1,0 +1,175 @@
+[0.009s] Invoking command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller -- -j16 -l16
+[0.066s] -- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.168s] -- Found rclcpp: 16.0.17 (/opt/ros/humble/share/rclcpp/cmake)
+[0.201s] -- Found rosidl_generator_c: 3.1.8 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.204s] -- Found rosidl_adapter: 3.1.8 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.212s] -- Found rosidl_generator_cpp: 3.1.8 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.221s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.238s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.271s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.273s] -- Found rmw_cyclonedds_cpp: 1.3.4 (/opt/ros/humble/share/rmw_cyclonedds_cpp/cmake)
+[0.289s] -- Using RMW implementation 'rmw_cyclonedds_cpp' as default
+[0.336s] -- Found moveit_ros_planning_interface: 2.5.9 (/opt/ros/humble/share/moveit_ros_planning_interface/cmake)
+[0.347s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: date_time filesystem program_options system thread 
+[0.477s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: chrono date_time filesystem iostreams program_options regex serialization system thread 
+[0.498s] -- Found parameter_traits: 0.6.0 (/opt/ros/humble/share/parameter_traits/cmake)
+[0.505s] -- Found rclcpp_lifecycle: 16.0.17 (/opt/ros/humble/share/rclcpp_lifecycle/cmake)
+[0.526s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: filesystem 
+[0.562s] -- library: /usr/lib/x86_64-linux-gnu/libcurl.so
+[0.585s] -- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+[0.673s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: system filesystem date_time program_options thread chrono 
+[0.692s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: thread system filesystem regex date_time program_options 
+[0.714s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: system filesystem date_time program_options thread 
+[0.733s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[0.740s] -- Found ament_lint_auto: 0.12.14 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[0.795s] -- Added test 'copyright' to check source files copyright and LICENSE
+[0.796s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[0.796s] -- Configured cppcheck include dirs: $<BUILD_INTERFACE:/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include>
+[0.796s] -- Configured cppcheck exclude dirs and/or files: 
+[0.797s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[0.797s] -- Configured cpplint exclude dirs and/or files: 
+[0.797s] -- Added test 'flake8' to check Python code syntax and style conventions
+[0.798s] -- Added test 'lint_cmake' to check CMake code style
+[0.798s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[0.799s] -- Added test 'uncrustify' to check C / C++ code style
+[0.799s] -- Configured uncrustify additional arguments: 
+[0.799s] -- Added test 'xmllint' to check XML markup files
+[0.801s] -- Configuring done
+[0.835s] -- Generating done
+[0.840s] -- Build files have been written to: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller
+[0.869s] [35m[1mConsolidate compiler generated dependencies of target end_effector_cmd[0m
+[0.895s] [ 50%] [32mBuilding CXX object CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o[0m
+[2.864s] In file included from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[2.864s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:13:5:[m[K [01;31m[Kerror: [m[K‘[01m[Kgeometry_msgs[m[K’ was not declared in this scope
+[2.864s]    13 |     [01;31m[Kgeometry_msgs[m[K::msg::Pose,
+[2.864s]       |     [01;31m[K^~~~~~~~~~~~~[m[K
+[2.864s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:16:1:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+[2.864s]    16 | [01;31m[K>[m[K;
+[2.864s]       | [01;31m[K^[m[K
+[2.868s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:23:41:[m[K [01;31m[Kerror: [m[K‘[01m[KTargetVariant[m[K’ does not name a type
+[2.868s]    23 |     bool set_end(SetEndMode mode, const [01;31m[KTargetVariant[m[K& target);
+[2.868s]       |                                         [01;31m[K^~~~~~~~~~~~~[m[K
+[2.869s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:27:5:[m[K [01;31m[Kerror: [m[K‘[01m[Kmoveit[m[K’ does not name a type; did you mean ‘[01m[Kmode_t[m[K’?
+[2.869s]    27 |     [01;31m[Kmoveit[m[K::planning_interface::MoveGroupInterface _arm_;
+[2.869s]       |     [01;31m[K^~~~~~[m[K
+[2.869s]       |     [32m[Kmode_t[m[K
+[4.180s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:[m[K In constructor ‘[01m[Kdm_arm::EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr&, const string&)[m[K’:
+[4.180s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:23:7:[m[K [01;31m[Kerror: [m[Kclass ‘[01m[Kdm_arm::EndEffectorCmd[m[K’ does not have any field named ‘[01m[K_arm_[m[K’
+[4.180s]    23 |     : [01;31m[K_arm_[m[K(node, group_name) {
+[4.180s]       |       [01;31m[K^~~~~[m[K
+[4.186s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/logging.hpp:24[m[K,
+[4.186s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:40[m[K,
+[4.186s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+[4.186s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+[4.186s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+[4.187s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+[4.187s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+[4.187s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+[4.187s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+[4.187s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+[4.187s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[4.187s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:4[m[K,
+[4.187s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[4.187s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:26:67:[m[K [01;31m[Kerror: [m[K‘[01m[K_arm_[m[K’ was not declared in this scope
+[4.187s]    26 |     RCLCPP_INFO(node->get_logger(), "Planning Frame - %s 已创建", [01;31m[K_arm_[m[K.getPlanningFrame().c_str());
+[4.187s]       |                                                                   [01;31m[K^~~~~[m[K
+[4.189s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:[m[K At global scope:
+[4.189s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:29:53:[m[K [01;31m[Kerror: [m[K‘[01m[KTargetVariant[m[K’ does not name a type
+[4.189s]    29 | bool EndEffectorCmd::set_end(SetEndMode mode, const [01;31m[KTargetVariant[m[K& target) {
+[4.189s]       |                                                     [01;31m[K^~~~~~~~~~~~~[m[K
+[4.190s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:[m[K In member function ‘[01m[Kbool dm_arm::EndEffectorCmd::set_end(dm_arm::SetEndMode, const int&)[m[K’:
+[4.190s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:32:65:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Kget_if<geometry_msgs::msg::Pose>(const int*)[m[K’
+[4.190s]    32 |             if(auto pose = [01;31m[Kstd::get_if<geometry_msgs::msg::Pose>(&target)[m[K) {
+[4.190s]       |                            [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[4.195s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:28[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+[4.195s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[4.195s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:4[m[K,
+[4.195s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[4.196s] [01m[K/usr/include/c++/11/variant:1156:5:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<long unsigned int _Np, class ... _Types> constexpr std::add_pointer_t<typename std::variant_alternative<_Np, std::variant<_Types ...> >::type> std::get_if(std::variant<_Types ...>*)[m[K’
+[4.196s]  1156 |     [01;36m[Kget_if[m[K(variant<_Types...>* __ptr) noexcept
+[4.196s]       |     [01;36m[K^~~~~~[m[K
+[4.196s] [01m[K/usr/include/c++/11/variant:1156:5:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[4.196s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:32:65:[m[K [01;31m[Kerror: [m[Ktype/value mismatch at argument 1 in template parameter list for ‘[01m[Ktemplate<long unsigned int _Np, class ... _Types> constexpr std::add_pointer_t<typename std::variant_alternative<_Np, std::variant<_Types ...> >::type> std::get_if(std::variant<_Types ...>*)[m[K’
+[4.196s]    32 |             if(auto pose = [01;31m[Kstd::get_if<geometry_msgs::msg::Pose>(&target)[m[K) {
+[4.196s]       |                            [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[4.196s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:32:65:[m[K [01;36m[Knote: [m[K  expected a constant of type ‘[01m[Klong unsigned int[m[K’, got ‘[01m[Kgeometry_msgs::msg::Pose[m[K’ {aka ‘[01m[Kgeometry_msgs::msg::Pose_<std::allocator<void> >[m[K’}
+[4.196s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:28[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+[4.196s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[4.196s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:4[m[K,
+[4.196s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[4.196s] [01m[K/usr/include/c++/11/variant:1170:5:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<long unsigned int _Np, class ... _Types> constexpr std::add_pointer_t<const typename std::variant_alternative<_Np, std::variant<_Types ...> >::type> std::get_if(const std::variant<_Types ...>*)[m[K’
+[4.196s]  1170 |     [01;36m[Kget_if[m[K(const variant<_Types...>* __ptr) noexcept
+[4.197s]       |     [01;36m[K^~~~~~[m[K
+[4.197s] [01m[K/usr/include/c++/11/variant:1170:5:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[4.197s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:32:65:[m[K [01;31m[Kerror: [m[Ktype/value mismatch at argument 1 in template parameter list for ‘[01m[Ktemplate<long unsigned int _Np, class ... _Types> constexpr std::add_pointer_t<const typename std::variant_alternative<_Np, std::variant<_Types ...> >::type> std::get_if(const std::variant<_Types ...>*)[m[K’
+[4.197s]    32 |             if(auto pose = [01;31m[Kstd::get_if<geometry_msgs::msg::Pose>(&target)[m[K) {
+[4.197s]       |                            [01;31m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[4.197s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:32:65:[m[K [01;36m[Knote: [m[K  expected a constant of type ‘[01m[Klong unsigned int[m[K’, got ‘[01m[Kgeometry_msgs::msg::Pose[m[K’ {aka ‘[01m[Kgeometry_msgs::msg::Pose_<std::allocator<void> >[m[K’}
+[4.197s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:28[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[4.197s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:4[m[K,
+[4.197s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[4.197s] [01m[K/usr/include/c++/11/variant:1183:5:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class _Tp, class ... _Types> constexpr std::add_pointer_t<_Tp> std::get_if(std::variant<_Types ...>*)[m[K’
+[4.197s]  1183 |     [01;36m[Kget_if[m[K(variant<_Types...>* __ptr) noexcept
+[4.197s]       |     [01;36m[K^~~~~~[m[K
+[4.197s] [01m[K/usr/include/c++/11/variant:1183:5:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[4.197s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:32:65:[m[K [01;36m[Knote: [m[K  mismatched types ‘[01m[Kstd::variant<_Types ...>[m[K’ and ‘[01m[Kconst int[m[K’
+[4.197s]    32 |             if(auto pose = [01;36m[Kstd::get_if<geometry_msgs::msg::Pose>(&target)[m[K) {
+[4.197s]       |                            [01;36m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[4.197s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:28[m[K,
+[4.197s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+[4.198s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+[4.198s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+[4.198s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+[4.198s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+[4.198s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+[4.198s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+[4.198s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+[4.198s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[4.198s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:4[m[K,
+[4.198s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[4.198s] [01m[K/usr/include/c++/11/variant:1194:5:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class _Tp, class ... _Types> constexpr std::add_pointer_t<const _Tp> std::get_if(const std::variant<_Types ...>*)[m[K’
+[4.198s]  1194 |     [01;36m[Kget_if[m[K(const variant<_Types...>* __ptr) noexcept
+[4.198s]       |     [01;36m[K^~~~~~[m[K
+[4.198s] [01m[K/usr/include/c++/11/variant:1194:5:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[4.198s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:32:65:[m[K [01;36m[Knote: [m[K  mismatched types ‘[01m[Kconst std::variant<_Types ...>[m[K’ and ‘[01m[Kconst int[m[K’
+[4.198s]    32 |             if(auto pose = [01;36m[Kstd::get_if<geometry_msgs::msg::Pose>(&target)[m[K) {
+[4.198s]       |                            [01;36m[K~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[4.200s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:33:17:[m[K [01;31m[Kerror: [m[K‘[01m[K_arm_[m[K’ was not declared in this scope
+[4.200s]    33 |                 [01;31m[K_arm_[m[K.setPoseTarget(*pose);
+[4.200s]       |                 [01;31m[K^~~~~[m[K
+[4.200s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:30:11:[m[K [01;35m[Kwarning: [m[Kenumeration value ‘[01m[KPosition[m[K’ not handled in switch [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wswitch-Wswitch]8;;[m[K]
+[4.200s]    30 |     switch[01;35m[K([m[Kmode) {
+[4.200s]       |           [01;35m[K^[m[K
+[4.201s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:30:11:[m[K [01;35m[Kwarning: [m[Kenumeration value ‘[01m[KOrientation[m[K’ not handled in switch [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wswitch-Wswitch]8;;[m[K]
+[5.986s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:38:1:[m[K [01;35m[Kwarning: [m[Kcontrol reaches end of non-void function [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wreturn-type-Wreturn-type]8;;[m[K]
+[5.987s]    38 | [01;35m[K}[m[K
+[5.987s]       | [01;35m[K^[m[K
+[6.053s] gmake[2]: *** [CMakeFiles/end_effector_cmd.dir/build.make:76：CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o] 错误 1
+[6.054s] gmake[1]: *** [CMakeFiles/Makefile2:137：CMakeFiles/end_effector_cmd.dir/all] 错误 2
+[6.054s] gmake: *** [Makefile:146：all] 错误 2
+[6.057s] Invoked command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller -- -j16 -l16

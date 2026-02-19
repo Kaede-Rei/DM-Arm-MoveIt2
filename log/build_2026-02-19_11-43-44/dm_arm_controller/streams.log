@@ -1,0 +1,103 @@
+[0.009s] Invoking command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller -- -j16 -l16
+[0.044s] [35m[1mConsolidate compiler generated dependencies of target end_effector_cmd[0m
+[0.070s] [ 50%] [32mBuilding CXX object CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o[0m
+[3.216s] In file included from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.216s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:13:20:[m[K [01;31m[Kerror: [m[K‘[01m[KPose[m[K’ is not a member of ‘[01m[Kgeometry_msgs[m[K’
+[3.216s]    13 |     geometry_msgs::[01;31m[KPose[m[K,
+[3.216s]       |                    [01;31m[K^~~~[m[K
+[3.243s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:13:20:[m[K [01;36m[Knote: [m[Ksuggested alternatives:
+[3.243s] In file included from [01m[K/opt/ros/humble/include/urdfdom_headers/urdf_model/joint.h:43[m[K,
+[3.243s]                  from [01m[K/opt/ros/humble/include/urdfdom_headers/urdf_model/link.h:44[m[K,
+[3.244s]                  from [01m[K/opt/ros/humble/include/urdfdom_headers/urdf_model/model.h:42[m[K,
+[3.244s]                  from [01m[K/opt/ros/humble/include/urdf/urdf/model.h:43[m[K,
+[3.244s]                  from [01m[K/opt/ros/humble/include/srdfdom/srdfdom/model.h:50[m[K,
+[3.244s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/robot_model.h:42[m[K,
+[3.244s]                  from [01m[K/opt/ros/humble/include/moveit/robot_state/robot_state.h:40[m[K,
+[3.244s]                  from [01m[K/opt/ros/humble/include/moveit/move_group_interface/move_group_interface.h:41[m[K,
+[3.244s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:5[m[K,
+[3.244s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.244s] [01m[K/opt/ros/humble/include/urdfdom_headers/urdf_model/pose.h:254:7:[m[K [01;36m[Knote: [m[K  ‘[01m[Kurdf::Pose[m[K’
+[3.244s]   254 | class [01;36m[KPose[m[K
+[3.244s]       |       [01;36m[K^~~~[m[K
+[3.244s] In file included from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.245s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:11:22:[m[K [01;36m[Knote: [m[K  ‘[01m[Kdm_arm::SetMode::Pose[m[K’
+[3.245s]    11 | enum class SetMode { [01;36m[KPose[m[K, Position, Orientation };
+[3.245s]       |                      [01;36m[K^~~~[m[K
+[3.245s] In file included from [01m[K/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/pose.hpp:7[m[K,
+[3.245s]                  from [01m[K/opt/ros/humble/include/moveit/kinematics_base/kinematics_base.h:39[m[K,
+[3.245s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/joint_model_group.h:42[m[K,
+[3.245s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/robot_model.h:45[m[K,
+[3.245s]                  from [01m[K/opt/ros/humble/include/moveit/robot_state/robot_state.h:40[m[K,
+[3.245s]                  from [01m[K/opt/ros/humble/include/moveit/move_group_interface/move_group_interface.h:41[m[K,
+[3.245s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:5[m[K,
+[3.245s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.245s] [01m[K/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/pose__struct.hpp:136:7:[m[K [01;36m[Knote: [m[K  ‘[01m[Kgeometry_msgs::msg::Pose[m[K’
+[3.245s]   136 | using [01;36m[KPose[m[K =
+[3.245s]       |       [01;36m[K^~~~[m[K
+[3.245s] In file included from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.245s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:14:20:[m[K [01;31m[Kerror: [m[K‘[01m[KPoint[m[K’ is not a member of ‘[01m[Kgeometry_msgs[m[K’; did you mean ‘[01m[Kgeometry_msgs::msg::Point[m[K’?
+[3.245s]    14 |     geometry_msgs::[01;31m[KPoint[m[K,
+[3.245s]       |                    [01;31m[K^~~~~[m[K
+[3.245s] In file included from [01m[K/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/pose__struct.hpp:21[m[K,
+[3.245s]                  from [01m[K/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/pose.hpp:7[m[K,
+[3.245s]                  from [01m[K/opt/ros/humble/include/moveit/kinematics_base/kinematics_base.h:39[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/joint_model_group.h:42[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/robot_model.h:45[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/robot_state/robot_state.h:40[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/move_group_interface/move_group_interface.h:41[m[K,
+[3.246s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:5[m[K,
+[3.246s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.246s] [01m[K/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/point__struct.hpp:151:7:[m[K [01;36m[Knote: [m[K‘[01m[Kgeometry_msgs::msg::Point[m[K’ declared here
+[3.246s]   151 | using [01;36m[KPoint[m[K =
+[3.246s]       |       [01;36m[K^~~~~[m[K
+[3.246s] In file included from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.246s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:15:20:[m[K [01;31m[Kerror: [m[K‘[01m[KQuaternion[m[K’ is not a member of ‘[01m[Kgeometry_msgs[m[K’
+[3.246s]    15 |     geometry_msgs::[01;31m[KQuaternion[m[K
+[3.246s]       |                    [01;31m[K^~~~~~~~~~[m[K
+[3.246s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:15:20:[m[K [01;36m[Knote: [m[Ksuggested alternatives:
+[3.246s] In file included from [01m[K/usr/include/eigen3/Eigen/Core:163[m[K,
+[3.246s]                  from [01m[K/usr/include/eigen3/Eigen/Geometry:11[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/joint_model.h:46[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/joint_model_group.h:40[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/robot_model.h:45[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/robot_state/robot_state.h:40[m[K,
+[3.246s]                  from [01m[K/opt/ros/humble/include/moveit/move_group_interface/move_group_interface.h:41[m[K,
+[3.246s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:5[m[K,
+[3.246s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.246s] [01m[K/usr/include/eigen3/Eigen/src/Core/util/ForwardDeclarations.h:293:58:[m[K [01;36m[Knote: [m[K  ‘[01m[KEigen::Quaternion[m[K’
+[3.246s]   293 | template<typename Scalar, int Options = AutoAlign> class [01;36m[KQuaternion[m[K;
+[3.246s]       |                                                          [01;36m[K^~~~~~~~~~[m[K
+[3.247s] In file included from [01m[K/opt/ros/humble/include/tf2/tf2/LinearMath/Matrix3x3.hpp:20[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/tf2/tf2/LinearMath/Transform.hpp:21[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/tf2/tf2/buffer_core.hpp:47[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/tf2_ros/tf2_ros/async_buffer_interface.hpp:39[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/tf2_ros/tf2_ros/buffer.hpp:41[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/tf2_ros/tf2_ros/buffer.h:35[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/moveit/move_group_interface/move_group_interface.h:62[m[K,
+[3.247s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:5[m[K,
+[3.247s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.247s] [01m[K/opt/ros/humble/include/tf2/tf2/LinearMath/Quaternion.hpp:29:7:[m[K [01;36m[Knote: [m[K  ‘[01m[Ktf2::Quaternion[m[K’
+[3.247s]    29 | class [01;36m[KQuaternion[m[K : public QuadWord {
+[3.247s]       |       [01;36m[K^~~~~~~~~~[m[K
+[3.247s] In file included from [01m[K/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/pose__struct.hpp:23[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/pose.hpp:7[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/moveit/kinematics_base/kinematics_base.h:39[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/joint_model_group.h:42[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/moveit/robot_model/robot_model.h:45[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/moveit/robot_state/robot_state.h:40[m[K,
+[3.247s]                  from [01m[K/opt/ros/humble/include/moveit/move_group_interface/move_group_interface.h:41[m[K,
+[3.247s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:5[m[K,
+[3.247s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.247s] [01m[K/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/detail/quaternion__struct.hpp:175:7:[m[K [01;36m[Knote: [m[K  ‘[01m[Kgeometry_msgs::msg::Quaternion[m[K’
+[3.247s]   175 | using [01;36m[KQuaternion[m[K =
+[3.247s]       |       [01;36m[K^~~~~~~~~~[m[K
+[3.247s] In file included from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.248s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:16:1:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+[3.248s]    16 | [01;31m[K>[m[K;
+[3.248s]       | [01;31m[K^[m[K
+[3.248s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:16:1:[m[K [01;31m[Kerror: [m[Ktemplate argument 2 is invalid
+[3.248s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:16:1:[m[K [01;31m[Kerror: [m[Ktemplate argument 3 is invalid
+[5.033s] gmake[2]: *** [CMakeFiles/end_effector_cmd.dir/build.make:76: CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o] 中断
+[5.033s] gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/end_effector_cmd.dir/all] 中断
+[5.033s] gmake: *** [Makefile:146: all] 中断
+[5.058s] Invoked command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller' returned '-2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller -- -j16 -l16

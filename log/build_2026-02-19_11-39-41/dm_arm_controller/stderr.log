@@ -1,0 +1,52 @@
+In file included from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:13:5:[m[K [01;31m[Kerror: [m[K‘[01m[Kgeometry_msgs[m[K’ was not declared in this scope
+   13 |     [01;31m[Kgeometry_msgs[m[K::msg::Pose,
+      |     [01;31m[K^~~~~~~~~~~~~[m[K
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:16:1:[m[K [01;31m[Kerror: [m[Ktemplate argument 1 is invalid
+   16 | [01;31m[K>[m[K;
+      | [01;31m[K^[m[K
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:23:41:[m[K [01;31m[Kerror: [m[K‘[01m[KTargetVariant[m[K’ does not name a type
+   23 |     bool set_end(SetEndMode mode, const [01;31m[KTargetVariant[m[K& target);
+      |                                         [01;31m[K^~~~~~~~~~~~~[m[K
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:27:5:[m[K [01;31m[Kerror: [m[K‘[01m[Kmoveit[m[K’ does not name a type; did you mean ‘[01m[Kmode_t[m[K’?
+   27 |     [01;31m[Kmoveit[m[K::planning_interface::MoveGroupInterface _arm_;
+      |     [01;31m[K^~~~~~[m[K
+      |     [32m[Kmode_t[m[K
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:[m[K In constructor ‘[01m[Kdm_arm::EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr&, const string&)[m[K’:
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:23:7:[m[K [01;31m[Kerror: [m[Kclass ‘[01m[Kdm_arm::EndEffectorCmd[m[K’ does not have any field named ‘[01m[K_arm_[m[K’
+   23 |     : [01;31m[K_arm_[m[K(node, group_name) {
+      |       [01;31m[K^~~~~[m[K
+In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/logging.hpp:24[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:40[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+                 from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+                 from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:4[m[K,
+                 from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:26:67:[m[K [01;31m[Kerror: [m[K‘[01m[K_arm_[m[K’ was not declared in this scope
+   26 |     RCLCPP_INFO(node->get_logger(), "Planning Frame - %s 已创建", [01;31m[K_arm_[m[K.getPlanningFrame().c_str());
+      |                                                                   [01;31m[K^~~~~[m[K
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:[m[K At global scope:
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:29:53:[m[K [01;31m[Kerror: [m[K‘[01m[KTargetVariant[m[K’ does not name a type
+   29 | bool EndEffectorCmd::set_end(SetEndMode mode, const [01;31m[KTargetVariant[m[K& target) {
+      |                                                     [01;31m[K^~~~~~~~~~~~~[m[K
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:[m[K In member function ‘[01m[Kbool dm_arm::EndEffectorCmd::set_end(dm_arm::SetEndMode, const int&)[m[K’:
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:30:11:[m[K [01;35m[Kwarning: [m[Kenumeration value ‘[01m[KPosition[m[K’ not handled in switch [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wswitch-Wswitch]8;;[m[K]
+   30 |     switch[01;35m[K([m[Kmode) {
+      |           [01;35m[K^[m[K
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:30:11:[m[K [01;35m[Kwarning: [m[Kenumeration value ‘[01m[KOrientation[m[K’ not handled in switch [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wswitch-Wswitch]8;;[m[K]
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:38:1:[m[K [01;35m[Kwarning: [m[Kno return statement in function returning non-void [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wreturn-type-Wreturn-type]8;;[m[K]
+   38 | [01;35m[K}[m[K
+      | [01;35m[K^[m[K
+[01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:29:68:[m[K [01;35m[Kwarning: [m[Kunused parameter ‘[01m[Ktarget[m[K’ [[01;35m[K]8;;https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wunused-parameter-Wunused-parameter]8;;[m[K]
+   29 | bool EndEffectorCmd::set_end(SetEndMode mode, [01;35m[Kconst TargetVariant& target[m[K) {
+      |                                               [01;35m[K~~~~~~~~~~~~~~~~~~~~~^~~~~~[m[K
+gmake[2]: *** [CMakeFiles/end_effector_cmd.dir/build.make:76：CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o] 错误 1
+gmake[1]: *** [CMakeFiles/Makefile2:137：CMakeFiles/end_effector_cmd.dir/all] 错误 2
+gmake: *** [Makefile:146：all] 错误 2

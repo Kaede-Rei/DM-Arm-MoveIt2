@@ -489,7 +489,7 @@ gripper_controller:
 -   在 MoveIt 2 (ROS 2) 中，**全局参数服务器（Parameter Server）已不存在**；每个节点都是独立的实体，必须在启动时显式获取其所需的全部上下文参数：
 
     ```python
-    # run.
+    # run.launch.py
     from launch import LaunchDescription
     from launch_ros.actions import Node
     from moveit_configs_utils import MoveItConfigsBuilder
@@ -516,5 +516,36 @@ gripper_controller:
     
     ```
 
-    
+### 4.2.2. 设置目标 Pose / Position / Orientation
+
+```cpp
+using TargetVariant = std::variant<
+    geometry_msgs::msg::Pose,
+    geometry_msgs::msg::Point,
+    geometry_msgs::msg::Quaternion
+>;
+/**
+ * @brief 设置末端执行器的目标位姿、位置或姿态
+ * @param target 目标位姿、位置或姿态(geometry_msgs::msg::Pose / geometry_msgs::msg::Point / geometry_msgs::msg::Quaternion)
+ * @return 设置是否成功
+ */
+bool EndEffectorCmd::set_end(const TargetVariant& target) {
+    bool success = false;
+
+    if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&target)) {
+        success = _arm_.setPoseTarget(*pose);
+    }
+    else if(auto* point = std::get_if<geometry_msgs::msg::Point>(&target)) {
+        success = _arm_.setPositionTarget(point->x, point->y, point->z);
+    }
+    else if(auto* quat = std::get_if<geometry_msgs::msg::Quaternion>(&target)) {
+        success = _arm_.setOrientationTarget(quat->x, quat->y, quat->z, quat->w);
+    }
+    else { return false; }
+
+    return success;
+}
+```
+
+
 

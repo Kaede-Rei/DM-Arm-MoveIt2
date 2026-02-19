@@ -1,0 +1,70 @@
+[0.009s] Invoking command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller -- -j16 -l16
+[0.028s] -- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.109s] -- Found rclcpp: 16.0.17 (/opt/ros/humble/share/rclcpp/cmake)
+[0.128s] -- Found rosidl_generator_c: 3.1.8 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.129s] -- Found rosidl_adapter: 3.1.8 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.133s] -- Found rosidl_generator_cpp: 3.1.8 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.138s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.146s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.165s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.166s] -- Found rmw_cyclonedds_cpp: 1.3.4 (/opt/ros/humble/share/rmw_cyclonedds_cpp/cmake)
+[0.177s] -- Using RMW implementation 'rmw_cyclonedds_cpp' as default
+[0.204s] -- Found moveit_ros_planning_interface: 2.5.9 (/opt/ros/humble/share/moveit_ros_planning_interface/cmake)
+[0.212s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: date_time filesystem program_options system thread 
+[0.305s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: chrono date_time filesystem iostreams program_options regex serialization system thread 
+[0.323s] -- Found parameter_traits: 0.6.0 (/opt/ros/humble/share/parameter_traits/cmake)
+[0.327s] -- Found rclcpp_lifecycle: 16.0.17 (/opt/ros/humble/share/rclcpp_lifecycle/cmake)
+[0.339s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: filesystem 
+[0.361s] -- library: /usr/lib/x86_64-linux-gnu/libcurl.so
+[0.377s] -- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+[0.445s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: system filesystem date_time program_options thread chrono 
+[0.463s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: thread system filesystem regex date_time program_options 
+[0.480s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: system filesystem date_time program_options thread 
+[0.496s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[0.500s] -- Found ament_lint_auto: 0.12.14 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[0.545s] -- Added test 'copyright' to check source files copyright and LICENSE
+[0.545s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[0.545s] -- Configured cppcheck include dirs: $<BUILD_INTERFACE:/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include>
+[0.545s] -- Configured cppcheck exclude dirs and/or files: 
+[0.546s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[0.546s] -- Configured cpplint exclude dirs and/or files: 
+[0.546s] -- Added test 'flake8' to check Python code syntax and style conventions
+[0.546s] -- Added test 'lint_cmake' to check CMake code style
+[0.547s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[0.547s] -- Added test 'uncrustify' to check C / C++ code style
+[0.547s] -- Configured uncrustify additional arguments: 
+[0.547s] -- Added test 'xmllint' to check XML markup files
+[0.548s] -- Configuring done
+[0.568s] -- Generating done
+[0.573s] -- Build files have been written to: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller
+[0.598s] [35m[1mConsolidate compiler generated dependencies of target end_effector_cmd[0m
+[0.627s] [ 50%] [32mBuilding CXX object CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o[0m
+[2.464s] In file included from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[2.464s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:17:5:[m[K [01;31m[Kerror: [m[K‘[01m[Kmoveit[m[K’ does not name a type; did you mean ‘[01m[Kmode_t[m[K’?
+[2.465s]    17 |     [01;31m[Kmoveit[m[K::planning_interface::MoveGroupInterface _arm_;
+[2.465s]       |     [01;31m[K^~~~~~[m[K
+[2.465s]       |     [32m[Kmode_t[m[K
+[3.749s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:[m[K In constructor ‘[01m[Kdm_arm::EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr&, const string&)[m[K’:
+[3.749s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:23:7:[m[K [01;31m[Kerror: [m[Kclass ‘[01m[Kdm_arm::EndEffectorCmd[m[K’ does not have any field named ‘[01m[K_arm_[m[K’
+[3.749s]    23 |     : [01;31m[K_arm_[m[K(node, group_name) {
+[3.749s]       |       [01;31m[K^~~~~[m[K
+[3.755s] In file included from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/logging.hpp:24[m[K,
+[3.755s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/client.hpp:40[m[K,
+[3.755s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/callback_group.hpp:24[m[K,
+[3.755s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/any_executable.hpp:20[m[K,
+[3.755s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategy.hpp:25[m[K,
+[3.755s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/memory_strategies.hpp:18[m[K,
+[3.756s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor_options.hpp:20[m[K,
+[3.756s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executor.hpp:37[m[K,
+[3.756s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors/multi_threaded_executor.hpp:25[m[K,
+[3.756s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/executors.hpp:21[m[K,
+[3.756s]                  from [01m[K/opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp:155[m[K,
+[3.756s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp:4[m[K,
+[3.756s]                  from [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:1[m[K:
+[3.756s] [01m[K/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/src/end_effector_cmd.cpp:26:67:[m[K [01;31m[Kerror: [m[K‘[01m[K_arm_[m[K’ was not declared in this scope
+[3.756s]    26 |     RCLCPP_INFO(node->get_logger(), "Planning Frame - %s 已创建", [01;31m[K_arm_[m[K.getPlanningFrame().c_str());
+[3.756s]       |                                                                   [01;31m[K^~~~~[m[K
+[5.502s] gmake[2]: *** [CMakeFiles/end_effector_cmd.dir/build.make:76：CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o] 错误 1
+[5.502s] gmake[1]: *** [CMakeFiles/Makefile2:137：CMakeFiles/end_effector_cmd.dir/all] 错误 2
+[5.502s] gmake: *** [Makefile:146：all] 错误 2
+[5.505s] Invoked command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller -- -j16 -l16
