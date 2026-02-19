@@ -32,6 +32,27 @@ EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr node, const std::string& 
     RCLCPP_INFO(_node_->get_logger(), "Planning Frame - %s 已创建", _base_link_.c_str());
     RCLCPP_INFO(_node_->get_logger(), "End Effector Link - %s 已创建", _eef_link_.c_str());
 
+    // 声明参数
+    _node_->declare_parameter("motion_planning.planning_time", 5.0);
+    _node_->declare_parameter("motion_planning.planning_attempts", 10);
+    _node_->declare_parameter("motion_planning.max_velocity_scaling_factor", 0.1);
+    _node_->declare_parameter("motion_planning.max_acceleration_scaling_factor", 0.1);
+    _node_->declare_parameter("motion_planning.planner_id", "RRTConnect");
+
+    _node_->declare_parameter("target_tolerance.position", 0.001);
+    _node_->declare_parameter("target_tolerance.orientation", 0.01);
+    _node_->declare_parameter("target_tolerance.joint", 0.01);
+
+    _node_->declare_parameter("tf.timeout", 0.1);
+    _node_->declare_parameter("tf.cache_duration", 10.0);
+
+    // 设置参数
+    _arm_.setPlanningTime(_node_->get_parameter("motion_planning.planning_time").as_double());
+    _arm_.setNumPlanningAttempts(_node_->get_parameter("motion_planning.planning_attempts").as_int());
+    _arm_.setMaxVelocityScalingFactor(_node_->get_parameter("motion_planning.max_velocity_scaling_factor").as_double());
+    _arm_.setMaxAccelerationScalingFactor(_node_->get_parameter("motion_planning.max_acceleration_scaling_factor").as_double());
+    _arm_.setPlannerId(_node_->get_parameter("motion_planning.planner_id").as_string());
+
     // 等待 1 秒
     rclcpp::sleep_for(std::chrono::seconds(1));
 
