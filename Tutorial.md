@@ -529,7 +529,7 @@ using TargetVariant = std::variant<
  * @param target 目标位姿、位置或姿态(geometry_msgs::msg::Pose / geometry_msgs::msg::Point / geometry_msgs::msg::Quaternion)
  * @return 设置是否成功
  */
-bool EndEffectorCmd::set_end(const TargetVariant& target) {
+bool EndEffectorCmd::set_target(const TargetVariant& target) {
     bool success = false;
 
     if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&target)) {
