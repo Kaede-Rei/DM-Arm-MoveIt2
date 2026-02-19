@@ -27,6 +27,7 @@ set(DEPENDENCIES
     # dependencies_name
     rclcpp
     moveit_ros_planning_interface
+    tf2_geometry_msgs
 )
 
 # 必需依赖

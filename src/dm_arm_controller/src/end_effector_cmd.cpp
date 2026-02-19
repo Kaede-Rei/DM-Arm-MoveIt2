@@ -21,12 +21,29 @@ namespace dm_arm {
  * @param node 共享指针，指向 ROS 2 节点
  * @param group_name 机械臂控制组的名称
  */
-EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr& node, const std::string& group_name)
-    : _arm_(node, group_name) {
-    _node_ = node;
+EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr node, const std::string& group_name)
+    : _node_(std::move(node)),
+    _arm_(_node_, group_name),
+    _tf_buffer_(std::make_unique<tf2_ros::Buffer>(_node_->get_clock())),
+    _tf_listener_(std::make_unique<tf2_ros::TransformListener>(*_tf_buffer_)),
+    _base_link_(_arm_.getPlanningFrame()),
+    _eef_link_(_arm_.getEndEffectorLink()) {
 
-    RCLCPP_INFO(node->get_logger(), "Planning Frame - %s 已创建", _arm_.getPlanningFrame().c_str());
-    RCLCPP_INFO(node->get_logger(), "End Effector Link - %s 已创建", _arm_.getEndEffectorLink().c_str());
+    RCLCPP_INFO(_node_->get_logger(), "Planning Frame - %s 已创建", _base_link_.c_str());
+    RCLCPP_INFO(_node_->get_logger(), "End Effector Link - %s 已创建", _eef_link_.c_str());
+
+    // 检查 TF 变换是否可用
+    try {
+        if(_tf_buffer_->canTransform(_base_link_, _eef_link_, rclcpp::Time(2.0))) {
+            RCLCPP_INFO(_node_->get_logger(), "TF 变换可用：%s -> %s", _base_link_.c_str(), _eef_link_.c_str());
+        }
+        else {
+            RCLCPP_WARN(_node_->get_logger(), "TF 变换不可用：%s -> %s", _base_link_.c_str(), _eef_link_.c_str());
+        }
+    }
+    catch(const tf2::TransformException& e) {
+        RCLCPP_ERROR(_node_->get_logger(), "检查 TF 变换时发生异常：%s", e.what());
+    }
 }
 
 /**
@@ -39,7 +56,7 @@ bool EndEffectorCmd::set_joints(const std::vector<double>& joint_values) {
 }
 
 /**
- * @brief 设置末端执行器的目标位姿、位置或姿态
+ * @brief 设置末端执行器的目标位姿、位置或姿态（底座坐标系）
  * @param target 目标位姿、位置或姿态(geometry_msgs::msg::Pose / geometry_msgs::msg::Point / geometry_msgs::msg::Quaternion)
  * @return 设置是否成功
  */
@@ -140,7 +157,7 @@ std::vector<double> EndEffectorCmd::get_current_joints() const {
 }
 
 /**
- * @brief 获取当前末端执行器的位姿
+ * @brief 获取当前末端执行器的位姿（底座坐标系）
  * @return 当前末端执行器的位姿
  */
 geometry_msgs::msg::Pose EndEffectorCmd::get_current_pose() const {
@@ -196,8 +213,18 @@ int main(int argc, char** argv) {
         shutdown_thread(spin_thread);
         return 1;
     }
-
     RCLCPP_INFO(node->get_logger(), "执行成功，目标位置已达成");
+
+    // 测试 TF 变换
+    geometry_msgs::msg::Pose current_pose = eef_cmd.get_current_pose();
+    geometry_msgs::msg::Pose end_pose;
+    if(eef_cmd.base_to_end_tf(current_pose, end_pose)) {
+        RCLCPP_INFO(node->get_logger(), "Base to End TF 转换成功");
+    }
+    else {
+        RCLCPP_ERROR(node->get_logger(), "Base to End TF 转换失败");
+    }
+
     shutdown_thread(spin_thread);
 
     return 0;
