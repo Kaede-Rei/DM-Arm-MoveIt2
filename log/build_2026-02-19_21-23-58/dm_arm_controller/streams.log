@@ -1,0 +1,33 @@
+[0.012s] Invoking command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller -- -j16 -l16
+[0.080s] [35m[1mConsolidate compiler generated dependencies of target end_effector_cmd[0m
+[0.114s] [ 50%] [32mBuilding CXX object CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o[0m
+[7.967s] [100%] [32m[1mLinking CXX executable end_effector_cmd[0m
+[8.305s] [100%] Built target end_effector_cmd
+[8.318s] Invoked command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller -- -j16 -l16
+[8.320s] Invoking command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller
+[8.329s] -- Install configuration: ""
+[8.329s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/dm_arm_controller/end_effector_cmd
+[8.330s] -- Set runtime path of "/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/dm_arm_controller/end_effector_cmd" to ""
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/launch
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/launch/run.launch.py
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/ament_index/resource_index/package_run_dependencies/dm_arm_controller
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/ament_index/resource_index/parent_prefix_path/dm_arm_controller
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/environment/ament_prefix_path.sh
+[8.330s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/environment/ament_prefix_path.dsv
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/environment/path.sh
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/environment/path.dsv
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/local_setup.bash
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/local_setup.sh
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/local_setup.zsh
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/local_setup.dsv
+[8.331s] -- Installing: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/package.dsv
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/ament_index/resource_index/packages/dm_arm_controller
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/ament_cmake_export_dependencies-extras.cmake
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/ament_cmake_export_include_directories-extras.cmake
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/dm_arm_controllerConfig.cmake
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/dm_arm_controllerConfig-version.cmake
+[8.331s] -- Up-to-date: /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/package.xml
+[8.333s] Invoked command in '/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller

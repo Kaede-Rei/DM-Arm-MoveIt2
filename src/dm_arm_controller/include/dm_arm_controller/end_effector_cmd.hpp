@@ -26,6 +26,7 @@ public:
 
     bool set_joints(const std::vector<double>& joint_values);
     bool set_target(const TargetVariant& target);
+    bool set_target_on_end(const TargetVariant& target);
     bool plan_and_execute();
 
     geometry_msgs::msg::Quaternion rpy_to_quaternion(double roll, double pitch, double yaw);
