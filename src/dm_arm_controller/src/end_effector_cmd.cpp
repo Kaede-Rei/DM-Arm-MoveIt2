@@ -92,6 +92,46 @@ bool EndEffectorCmd::plan_and_execute() {
 }
 
 /**
+ * @brief 将 Roll-Pitch-Yaw 角转换为四元数
+ * @param roll 滚转角（绕 X 轴旋转）
+ * @param pitch 俯仰角（绕 Y 轴旋转）
+ * @param yaw 偏航角（绕 Z 轴旋转）
+ * @return 转换后的四元数
+ */
+geometry_msgs::msg::Quaternion EndEffectorCmd::rpy_to_quaternion(double roll, double pitch, double yaw) {
+    tf2::Quaternion quat;
+    quat.setRPY(roll, pitch, yaw);
+    quat.normalize();
+
+    geometry_msgs::msg::Quaternion quat_msg;
+    quat_msg.x = quat.x();
+    quat_msg.y = quat.y();
+    quat_msg.z = quat.z();
+    quat_msg.w = quat.w();
+
+    return quat_msg;
+}
+
+/**
+ * @brief 将 Roll-Pitch-Yaw 角和位置转换为位姿
+ * @param roll 滚转角（绕 X 轴旋转）
+ * @param pitch 俯仰角（绕 Y 轴旋转）
+ * @param yaw 偏航角（绕 Z 轴旋转）
+ * @param x X 坐标
+ * @param y Y 坐标
+ * @param z Z 坐标
+ * @return 转换后的位姿
+ */
+geometry_msgs::msg::Pose EndEffectorCmd::rpy_to_pose(double roll, double pitch, double yaw, double x, double y, double z) {
+    geometry_msgs::msg::Pose pose;
+    pose.position.x = x;
+    pose.position.y = y;
+    pose.position.z = z;
+    pose.orientation = rpy_to_quaternion(roll, pitch, yaw);
+    return pose;
+}
+
+/**
  * @brief 获取当前关节值
  * @return 当前关节值的向量
  */

@@ -26,6 +26,11 @@ public:
     bool set_end(const TargetVariant& target);
     bool plan_and_execute();
 
+    geometry_msgs::msg::Quaternion rpy_to_quaternion(double roll, double pitch, double yaw);
+    geometry_msgs::msg::Pose rpy_to_pose(double roll, double pitch, double yaw, double x, double y, double z);
+    bool base_to_end_tf(const TargetVariant& base, TargetVariant& end);
+    bool end_to_base_tf(const TargetVariant& end, TargetVariant& base);
+
     std::vector<double> get_current_joints() const;
     std::vector<std::string> get_current_link_names() const;
     geometry_msgs::msg::Pose get_current_pose() const;

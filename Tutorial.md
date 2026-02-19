@@ -547,5 +547,33 @@ bool EndEffectorCmd::set_end(const TargetVariant& target) {
 }
 ```
 
+### 4.2.3. RPY 转四元数
+
+-   MoveIt2 的接口要求使用四元数，避免欧拉角的万向锁以及插值不连续问题
+-   RPY 转四元数基于 TF2 (ROS 2 的坐标变换)：
+
+```cpp
+/**
+ * @brief 将 Roll-Pitch-Yaw 角转换为四元数
+ * @param roll 滚转角（绕 X 轴旋转）
+ * @param pitch 俯仰角（绕 Y 轴旋转）
+ * @param yaw 偏航角（绕 Z 轴旋转）
+ * @return 转换后的四元数
+ */
+geometry_msgs::msg::Quaternion EndEffectorCmd::rpy_to_quaternion(double roll, double pitch, double yaw) {
+    tf2::Quaternion quat;
+    quat.setRPY(roll, pitch, yaw);
+    quat.normalize();
+
+    geometry_msgs::msg::Quaternion quat_msg;
+    quat_msg.x = quat.x();
+    quat_msg.y = quat.y();
+    quat_msg.z = quat.z();
+    quat_msg.w = quat.w();
+
+    return quat_msg;
+}
+```
+
 
 

@@ -23,6 +23,8 @@ public:
     ~EndEffectorCmd() = default;
 
     bool set_joints(const std::vector<double>& joint_values);
+    geometry_msgs::msg::Quaternion rpy_to_quaternion(double roll, double pitch, double yaw);
+    geometry_msgs::msg::Pose rpy_to_pose(double roll, double pitch, double yaw, double x, double y, double z);
     bool set_end(const TargetVariant& target);
     bool plan_and_execute();
 
