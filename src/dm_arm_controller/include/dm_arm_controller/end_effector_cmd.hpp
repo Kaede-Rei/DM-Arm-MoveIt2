@@ -8,7 +8,6 @@
 
 namespace dm_arm {
 
-
 // ! ========================= 接 口 变 量 / Typedef 声 明 ========================= ! //
 
 /**
@@ -83,21 +82,21 @@ enum class TimeParamMethod {
 };
 
 /**
- * @brief EndEffectorCmd 类：用于规划末端执行器的运动
+ * @brief ArmController 类：用于规划机械臂的运动
  */
-class EndEffectorCmd {
+class ArmController {
 public:
-    EndEffectorCmd(rclcpp::Node::SharedPtr node, const std::string& group_name);
-    ~EndEffectorCmd();
+    ArmController(rclcpp::Node::SharedPtr node, const std::string& group_name);
+    ~ArmController();
 
     void home();
     ErrorCode set_joints(const std::vector<double>& joint_values);
     ErrorCode set_target(const TargetVariant& target);
-    ErrorCode set_target_on_end(const TargetVariant& target);
+    ErrorCode set_target_in_eef_frame(const TargetVariant& target);
     void clear_target();
     ErrorCode telescopic_end(double length);
     ErrorCode rotate_end(double angle);
-    ErrorCode plan();
+    ErrorCode plan(moveit::planning_interface::MoveGroupInterface::Plan& plan);
     ErrorCode plan_and_execute();
     ErrorCode async_plan_and_execute(std::function<void(ErrorCode)> callback = nullptr);
     void stop();
@@ -136,8 +135,8 @@ private:
     std::unique_ptr<tf2_ros::Buffer> _tf_buffer_;
     std::unique_ptr<tf2_ros::TransformListener> _tf_listener_;
 
-    const std::string& _base_link_;
-    const std::string& _eef_link_;
+    const std::string _base_link_;
+    const std::string _eef_link_;
 
     double _vel_scale_;
     double _acc_scale_;
@@ -165,7 +164,7 @@ private:
  * @return 转换是否成功
  */
 template<class T>
-ErrorCode EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
+ErrorCode ArmController::base_to_end_tf(const T& in, T& out) {
     // 检查输入类型
     static_assert(
         std::is_same_v<T, geometry_msgs::msg::Pose> ||
@@ -226,7 +225,7 @@ ErrorCode EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
  * @return 转换是否成功
  */
 template<class T>
-ErrorCode EndEffectorCmd::end_to_base_tf(const T& in, T& out) {
+ErrorCode ArmController::end_to_base_tf(const T& in, T& out) {
     // 检查输入类型
     static_assert(
         std::is_same_v<T, geometry_msgs::msg::Pose> ||

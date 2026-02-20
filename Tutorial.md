@@ -529,7 +529,7 @@ using TargetVariant = std::variant<
  * @param target 目标位姿、位置或姿态(geometry_msgs::msg::Pose / geometry_msgs::msg::Point / geometry_msgs::msg::Quaternion)
  * @return 设置是否成功
  */
-bool EndEffectorCmd::set_target(const TargetVariant& target) {
+bool ArmController::set_target(const TargetVariant& target) {
     bool success = false;
 
     if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&target)) {
@@ -560,7 +560,7 @@ bool EndEffectorCmd::set_target(const TargetVariant& target) {
  * @param yaw 偏航角（绕 Z 轴旋转）
  * @return 转换后的四元数
  */
-geometry_msgs::msg::Quaternion EndEffectorCmd::rpy_to_quaternion(double roll, double pitch, double yaw) {
+geometry_msgs::msg::Quaternion ArmController::rpy_to_quaternion(double roll, double pitch, double yaw) {
     tf2::Quaternion quat;
     quat.setRPY(roll, pitch, yaw);
     quat.normalize();
@@ -620,7 +620,7 @@ geometry_msgs::msg::Quaternion EndEffectorCmd::rpy_to_quaternion(double roll, do
  * @return 转换是否成功
  */
 template<class T>
-bool EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
+bool ArmController::base_to_end_tf(const T& in, T& out) {
     // 检查输入类型
     static_assert(
         std::is_same_v<T, geometry_msgs::msg::Pose> ||
@@ -972,7 +972,7 @@ void cancel_async() {
 }
 
 // 析构函数
-~EndEffectorCmd() {
+~ArmController() {
     cancel_async();
 }
 ```

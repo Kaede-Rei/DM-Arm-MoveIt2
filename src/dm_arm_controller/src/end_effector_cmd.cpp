@@ -37,11 +37,11 @@ std::string err_to_string(ErrorCode code) {
 }
 
 /**
- * @brief EndEffectorCmd 构造函数：初始化 MoveGroupInterface 并打印规划帧信息
+ * @brief ArmController 构造函数：初始化 MoveGroupInterface 并打印规划帧信息
  * @param node 共享指针，指向 ROS 2 节点
  * @param group_name 机械臂控制组的名称
  */
-EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr node, const std::string& group_name)
+ArmController::ArmController(rclcpp::Node::SharedPtr node, const std::string& group_name)
     : _node_(std::move(node)),
     _arm_(_node_, group_name),
     _tf_buffer_(std::make_unique<tf2_ros::Buffer>(_node_->get_clock())),
@@ -104,9 +104,9 @@ EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr node, const std::string& 
 }
 
 /**
- * @brief EndEffectorCmd 析构函数：等待异步线程结束
+ * @brief ArmController 析构函数：等待异步线程结束
  */
-EndEffectorCmd::~EndEffectorCmd() {
+ArmController::~ArmController() {
     if(_async_thread_.joinable()) {
         _async_thread_.join();
     }
@@ -115,7 +115,7 @@ EndEffectorCmd::~EndEffectorCmd() {
 /**
  * @brief 将末端执行器复位
  */
-void EndEffectorCmd::home() {
+void ArmController::home() {
     RCLCPP_INFO(_node_->get_logger(), "将末端执行器复位到 home 位姿");
     _arm_.setNamedTarget("home");
     _arm_.move();
@@ -126,7 +126,7 @@ void EndEffectorCmd::home() {
  * @param joint_values 目标关节值的向量
  * @return 设置是否成功
  */
-ErrorCode EndEffectorCmd::set_joints(const std::vector<double>& joint_values) {
+ErrorCode ArmController::set_joints(const std::vector<double>& joint_values) {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法设置新目标");
         return ErrorCode::ASYNC_TASK_RUNNING;
@@ -140,7 +140,7 @@ ErrorCode EndEffectorCmd::set_joints(const std::vector<double>& joint_values) {
  * @param target 目标位姿、位置或姿态(geometry_msgs::msg::Pose / geometry_msgs::msg::Point / geometry_msgs::msg::Quaternion)
  * @return 设置是否成功
  */
-ErrorCode EndEffectorCmd::set_target(const TargetVariant& target) {
+ErrorCode ArmController::set_target(const TargetVariant& target) {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法设置新目标");
         return ErrorCode::ASYNC_TASK_RUNNING;
@@ -177,7 +177,7 @@ ErrorCode EndEffectorCmd::set_target(const TargetVariant& target) {
  * @param target 目标位姿、位置或姿态(geometry_msgs::msg::Pose / geometry_msgs::msg::Point / geometry_msgs::msg::Quaternion)
  * @return 设置是否成功
  */
-ErrorCode EndEffectorCmd::set_target_on_end(const TargetVariant& target) {
+ErrorCode ArmController::set_target_in_eef_frame(const TargetVariant& target) {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法设置新目标");
         return ErrorCode::ASYNC_TASK_RUNNING;
@@ -220,7 +220,7 @@ ErrorCode EndEffectorCmd::set_target_on_end(const TargetVariant& target) {
 /**
  * @brief 清除所有目标位姿、位置和姿态
  */
-void EndEffectorCmd::clear_target() {
+void ArmController::clear_target() {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法清除目标");
         return;
@@ -234,14 +234,14 @@ void EndEffectorCmd::clear_target() {
  * @param length 伸缩长度（正值表示伸长，负值表示缩短）
  * @return 伸缩是否成功
  */
-ErrorCode EndEffectorCmd::telescopic_end(double length) {
+ErrorCode ArmController::telescopic_end(double length) {
     geometry_msgs::msg::Pose point;
     point.position.x = 0.0;
     point.position.y = 0.0;
     point.position.z = length;
     point.orientation = rpy_to_quaternion(0.0, 0.0, 0.0);
 
-    return set_target_on_end(point);
+    return set_target_in_eef_frame(point);
 }
 
 /**
@@ -249,26 +249,25 @@ ErrorCode EndEffectorCmd::telescopic_end(double length) {
  * @param angle 旋转角度（单位：弧度，正值表示逆时针旋转，负值表示顺时针旋转）
  * @return 旋转是否成功
  */
-ErrorCode EndEffectorCmd::rotate_end(double angle) {
+ErrorCode ArmController::rotate_end(double angle) {
     geometry_msgs::msg::Pose pose;
     pose = rpy_to_pose(0.0, 0.0, angle, 0.0, 0.0, 0.0);
 
-    return set_target_on_end(pose);
+    return set_target_in_eef_frame(pose);
 }
 
 /**
  * @brief 规划运动
+ * @param plan 规划结果，包含轨迹等信息
  * @return 规划是否成功
  */
-ErrorCode EndEffectorCmd::plan() {
+ErrorCode ArmController::plan(moveit::planning_interface::MoveGroupInterface::Plan& plan) {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法进行新的规划");
         return ErrorCode::ASYNC_TASK_RUNNING;
     }
 
     RCLCPP_INFO(_node_->get_logger(), "正在规划...");
-
-    moveit::planning_interface::MoveGroupInterface::Plan plan;
 
     moveit::core::MoveItErrorCode err_code = _arm_.plan(plan);
     if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
@@ -284,7 +283,7 @@ ErrorCode EndEffectorCmd::plan() {
  * @brief 规划并执行运动
  * @return 规划和执行是否成功
  */
-ErrorCode EndEffectorCmd::plan_and_execute() {
+ErrorCode ArmController::plan_and_execute() {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法进行新的规划和执行");
         return ErrorCode::ASYNC_TASK_RUNNING;
@@ -316,7 +315,7 @@ ErrorCode EndEffectorCmd::plan_and_execute() {
  * @param callback 可选的回调函数，在规划和执行完成后调用，参数为 bool 类型，表示规划和执行是否成功，返回值为 void
  * @return 是否成功启动异步规划和执行
  */
-ErrorCode EndEffectorCmd::async_plan_and_execute(std::function<void(ErrorCode)> callback) {
+ErrorCode ArmController::async_plan_and_execute(std::function<void(ErrorCode)> callback) {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，请稍后再试");
         return ErrorCode::ASYNC_TASK_RUNNING;
@@ -360,7 +359,7 @@ ErrorCode EndEffectorCmd::async_plan_and_execute(std::function<void(ErrorCode)> 
 /**
  * @brief 停止当前运动
  */
-void EndEffectorCmd::stop() {
+void ArmController::stop() {
     _arm_.stop();
     RCLCPP_INFO(_node_->get_logger(), "已停止当前运动");
 }
@@ -373,7 +372,7 @@ void EndEffectorCmd::stop() {
  * @param acc_scale 加速度缩放因子（默认值为 0.1）
  * @return 时间参数化是否成功
  */
-ErrorCode EndEffectorCmd::parameterize_time(moveit_msgs::msg::RobotTrajectory& trajectory, TimeParamMethod method, double vel_scale, double acc_scale) {
+ErrorCode ArmController::parameterize_time(moveit_msgs::msg::RobotTrajectory& trajectory, TimeParamMethod method, double vel_scale, double acc_scale) {
     // 创建 robot_trajectory::RobotTrajectory 对象
     robot_trajectory::RobotTrajectory rt(_arm_.getRobotModel(), _arm_.getName());
     rt.setRobotTrajectoryMsg(*_arm_.getCurrentState(), trajectory);
@@ -414,7 +413,7 @@ ErrorCode EndEffectorCmd::parameterize_time(moveit_msgs::msg::RobotTrajectory& t
  * @param acc_scale 加速度缩放因子（默认值为 0.1）
  * @return 规划结果，包括是否成功、生成的轨迹和任何错误信息
  */
-DescartesResult EndEffectorCmd::plan_decartes(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
+DescartesResult ArmController::plan_decartes(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
     DescartesResult result;
     result.error_code = ErrorCode::SUCCESS;
 
@@ -475,7 +474,7 @@ DescartesResult EndEffectorCmd::plan_decartes(const std::vector<geometry_msgs::m
  * @param acc_scale 加速度缩放因子（默认值为 0.1）
  * @return 规划结果，包括是否成功、生成的轨迹和任何错误信息
  */
-DescartesResult EndEffectorCmd::set_line(const TargetVariant& start, const TargetVariant& end, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
+DescartesResult ArmController::set_line(const TargetVariant& start, const TargetVariant& end, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
     // 将起点和终点转换为位姿
     geometry_msgs::msg::Pose start_pose;
     geometry_msgs::msg::Pose end_pose;
@@ -529,7 +528,7 @@ DescartesResult EndEffectorCmd::set_line(const TargetVariant& start, const Targe
  * @param acc_scale 加速度缩放因子（默认值为 0.1）
  * @return 规划结果，包括是否成功、生成的轨迹和任何错误信息
  */
-DescartesResult EndEffectorCmd::set_bezier_curve(const TargetVariant& start, const TargetVariant& via, const TargetVariant& end, int curve_segments, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
+DescartesResult ArmController::set_bezier_curve(const TargetVariant& start, const TargetVariant& via, const TargetVariant& end, int curve_segments, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
     // 将起点、途经点和终点转换为位姿
     geometry_msgs::msg::Pose start_pose;
     geometry_msgs::msg::Pose via_pose;
@@ -606,7 +605,7 @@ DescartesResult EndEffectorCmd::set_bezier_curve(const TargetVariant& start, con
  * @param trajectory 预设的运动轨迹
  * @return 规划和执行是否成功
  */
-ErrorCode EndEffectorCmd::execute(const moveit_msgs::msg::RobotTrajectory& trajectory) {
+ErrorCode ArmController::execute(const moveit_msgs::msg::RobotTrajectory& trajectory) {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法执行新轨迹");
         return ErrorCode::ASYNC_TASK_RUNNING;
@@ -633,7 +632,7 @@ ErrorCode EndEffectorCmd::execute(const moveit_msgs::msg::RobotTrajectory& traje
  * @param callback 可选的回调函数，在执行完成后调用，参数为 bool 类型，表示执行是否成功，返回值为 void
  * @return 是否成功启动异步执行
  */
-ErrorCode EndEffectorCmd::async_execute(const moveit_msgs::msg::RobotTrajectory& trajectory, std::function<void(ErrorCode)> callback) {
+ErrorCode ArmController::async_execute(const moveit_msgs::msg::RobotTrajectory& trajectory, std::function<void(ErrorCode)> callback) {
     if(_is_planning_or_executing_) {
         RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，请稍后再试");
         return ErrorCode::ASYNC_TASK_RUNNING;
@@ -675,7 +674,7 @@ ErrorCode EndEffectorCmd::async_execute(const moveit_msgs::msg::RobotTrajectory&
  * @param tolerance_z 姿态约束在 Z 轴上的容忍度（单位：弧度，默认值为 0.3）
  * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
  */
-void EndEffectorCmd::set_orientation_constraint(const geometry_msgs::msg::Quaternion& target_orientation, double tolerance_x, double tolerance_y, double tolerance_z, double weight) {
+void ArmController::set_orientation_constraint(const geometry_msgs::msg::Quaternion& target_orientation, double tolerance_x, double tolerance_y, double tolerance_z, double weight) {
     // 创建姿态约束对象
     moveit_msgs::msg::OrientationConstraint ocm;
     ocm.link_name = _eef_link_;
@@ -702,7 +701,7 @@ void EndEffectorCmd::set_orientation_constraint(const geometry_msgs::msg::Quater
  * @param scope_size 位置约束的范围大小（单位：米）
  * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
  */
-void EndEffectorCmd::set_position_constraint(const geometry_msgs::msg::Point& target_position, const geometry_msgs::msg::Vector3& scope_size, double weight) {
+void ArmController::set_position_constraint(const geometry_msgs::msg::Point& target_position, const geometry_msgs::msg::Vector3& scope_size, double weight) {
     // 创建位置约束对象
     moveit_msgs::msg::PositionConstraint pcm;
     pcm.link_name = _eef_link_;
@@ -738,7 +737,7 @@ void EndEffectorCmd::set_position_constraint(const geometry_msgs::msg::Point& ta
  * @param lower 关节角度的下容忍度（单位：弧度，默认值为 0.1）
  * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
  */
-void EndEffectorCmd::set_joint_constraint(const std::string& joint_name, double target_angle, double above, double below, double weight) {
+void ArmController::set_joint_constraint(const std::string& joint_name, double target_angle, double above, double below, double weight) {
     moveit_msgs::msg::JointConstraint jc;
     jc.joint_name = joint_name;
     jc.position = target_angle;
@@ -754,7 +753,7 @@ void EndEffectorCmd::set_joint_constraint(const std::string& joint_name, double 
 /**
  * @brief 应用所有姿态约束
  */
-void EndEffectorCmd::apply_constraints() {
+void ArmController::apply_constraints() {
     _arm_.setPathConstraints(_constraints_);
     RCLCPP_INFO(_node_->get_logger(), "已应用所有姿态约束");
 }
@@ -762,7 +761,7 @@ void EndEffectorCmd::apply_constraints() {
 /**
  * @brief 清除所有姿态约束
  */
-void EndEffectorCmd::clear_constraints() {
+void ArmController::clear_constraints() {
     _constraints_ = moveit_msgs::msg::Constraints();
     _arm_.clearPathConstraints();
     RCLCPP_INFO(_node_->get_logger(), "已清除所有姿态约束");
@@ -772,7 +771,7 @@ void EndEffectorCmd::clear_constraints() {
  * @brief 判断当前是否有异步规划或执行正在进行
  * @return 如果有异步规划或执行正在进行，则返回 true；否则返回 false
  */
-bool EndEffectorCmd::is_planning_or_executing() const {
+bool ArmController::is_planning_or_executing() const {
     return _is_planning_or_executing_;
 }
 
@@ -780,7 +779,7 @@ bool EndEffectorCmd::is_planning_or_executing() const {
  * @brief 取消当前的异步规划或执行
  * @return 是否成功取消
  */
-ErrorCode EndEffectorCmd::cancel_async() {
+ErrorCode ArmController::cancel_async() {
     if(!_is_planning_or_executing_) {
         RCLCPP_INFO(_node_->get_logger(), "当前没有正在进行的异步任务");
         return ErrorCode::SUCCESS;
@@ -805,7 +804,7 @@ ErrorCode EndEffectorCmd::cancel_async() {
  * @param yaw 偏航角（绕 Z 轴旋转）
  * @return 转换后的四元数
  */
-geometry_msgs::msg::Quaternion EndEffectorCmd::rpy_to_quaternion(double roll, double pitch, double yaw) {
+geometry_msgs::msg::Quaternion ArmController::rpy_to_quaternion(double roll, double pitch, double yaw) {
     tf2::Quaternion quat;
     quat.setRPY(roll, pitch, yaw);
     quat.normalize();
@@ -829,7 +828,7 @@ geometry_msgs::msg::Quaternion EndEffectorCmd::rpy_to_quaternion(double roll, do
  * @param z Z 坐标
  * @return 转换后的位姿
  */
-geometry_msgs::msg::Pose EndEffectorCmd::rpy_to_pose(double roll, double pitch, double yaw, double x, double y, double z) {
+geometry_msgs::msg::Pose ArmController::rpy_to_pose(double roll, double pitch, double yaw, double x, double y, double z) {
     geometry_msgs::msg::Pose pose;
     pose.position.x = x;
     pose.position.y = y;
@@ -843,7 +842,7 @@ geometry_msgs::msg::Pose EndEffectorCmd::rpy_to_pose(double roll, double pitch, 
  * @brief 获取当前关节值
  * @return 当前关节值的向量
  */
-std::vector<double> EndEffectorCmd::get_current_joints() const {
+std::vector<double> ArmController::get_current_joints() const {
     return _arm_.getCurrentJointValues();
 }
 
@@ -851,7 +850,7 @@ std::vector<double> EndEffectorCmd::get_current_joints() const {
  * @brief 获取当前末端执行器的位姿（底座坐标系）
  * @return 当前末端执行器的位姿
  */
-geometry_msgs::msg::Pose EndEffectorCmd::get_current_pose() const {
+geometry_msgs::msg::Pose ArmController::get_current_pose() const {
     return _arm_.getCurrentPose().pose;
 }
 
@@ -859,7 +858,7 @@ geometry_msgs::msg::Pose EndEffectorCmd::get_current_pose() const {
  * @brief 获取当前机械臂的关节名称
  * @return 当前机械臂的关节名称的向量
  */
-std::vector<std::string> EndEffectorCmd::get_current_link_names() const {
+std::vector<std::string> ArmController::get_current_link_names() const {
     return _arm_.getJointNames();
 }
 
@@ -876,8 +875,8 @@ int main(int argc, char** argv) {
     executor.add_node(node);
     std::thread spin_thread([&executor]() { executor.spin(); });
 
-    // 创建 EndEffectorCmd 实例
-    dm_arm::EndEffectorCmd eef_cmd(node, "arm");
+    // 创建 ArmController 实例
+    dm_arm::ArmController eef_cmd(node, "arm");
     eef_cmd.home();
 
     // ===== 测试 1: 用 TOTG 异步规划直线 =====
