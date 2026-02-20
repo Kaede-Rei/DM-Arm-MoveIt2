@@ -675,3 +675,5 @@ bool EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
 }
 ```
 
+# 5. 笛卡尔空间约束规划
+
