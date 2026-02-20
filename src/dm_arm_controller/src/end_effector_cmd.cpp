@@ -138,6 +138,21 @@ bool EndEffectorCmd::set_target_on_end(const TargetVariant& target) {
         return false;
     }
 
+    return success;
+}
+
+/**
+ * @brief 规划运动
+ * @return 规划是否成功
+ */
+bool EndEffectorCmd::plan() {
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    moveit::core::MoveItErrorCode err_code = _arm_.plan(plan);
+    if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
+        RCLCPP_ERROR(_node_->get_logger(), "规划失败，错误码：%d", err_code.val);
+        return false;
+    }
+    RCLCPP_INFO(_node_->get_logger(), "规划成功");
     return true;
 }
 
@@ -283,9 +298,9 @@ int main(int argc, char** argv) {
     // ===== 测试 5: 设置目标位置（Point）=====
     RCLCPP_INFO(node->get_logger(), "\n[测试 5] 设置目标位置（Point）");
     geometry_msgs::msg::Point target_point;
-    target_point.x = 0.4;
-    target_point.y = 0.0;
-    target_point.z = 0.4;
+    target_point.x = 0.0;
+    target_point.y = 0.2;
+    target_point.z = 0.2;
     bool success = eef_cmd.set_target(target_point);
     RCLCPP_INFO(node->get_logger(), "设置目标位置: (%.3f, %.3f, %.3f) - %s",
         target_point.x, target_point.y, target_point.z,
@@ -301,101 +316,101 @@ int main(int argc, char** argv) {
         RCLCPP_INFO(node->get_logger(), "运动执行完成");
     }
 
-    // ===== 测试 7: 设置目标位姿（Pose） =====
-    RCLCPP_INFO(node->get_logger(), "\n[测试 7] 设置目标位姿（Pose）");
-    geometry_msgs::msg::Pose target_pose2 = eef_cmd.rpy_to_pose(0.0, 0.0, 0.0, 0.35, -0.1, 0.45);
-    success = eef_cmd.set_target(target_pose2);
-    RCLCPP_INFO(node->get_logger(), "设置目标位姿 - %s", success ? "成功" : "失败");
+    // // ===== 测试 7: 设置目标位姿（Pose） =====
+    // RCLCPP_INFO(node->get_logger(), "\n[测试 7] 设置目标位姿（Pose）");
+    // geometry_msgs::msg::Pose target_pose2 = eef_cmd.rpy_to_pose(0.0, 0.0, 0.0, 0.35, -0.1, 0.45);
+    // success = eef_cmd.set_target(target_pose2);
+    // RCLCPP_INFO(node->get_logger(), "设置目标位姿 - %s", success ? "成功" : "失败");
 
-    success = eef_cmd.plan_and_execute();
-    if(!success) {
-        RCLCPP_WARN(node->get_logger(), "位姿规划或执行失败，继续测试其他功能");
-    }
-    else {
-        RCLCPP_INFO(node->get_logger(), "位姿运动执行完成");
-    }
+    // success = eef_cmd.plan_and_execute();
+    // if(!success) {
+    //     RCLCPP_WARN(node->get_logger(), "位姿规划或执行失败，继续测试其他功能");
+    // }
+    // else {
+    //     RCLCPP_INFO(node->get_logger(), "位姿运动执行完成");
+    // }
 
-    // ===== 测试 8: 设置目标姿态（Quaternion） =====
-    RCLCPP_INFO(node->get_logger(), "\n[测试 8] 设置目标姿态（Quaternion）");
-    geometry_msgs::msg::Quaternion target_quat = eef_cmd.rpy_to_quaternion(0.0, 0.0, 1.5708); // π/2
-    success = eef_cmd.set_target(target_quat);
-    RCLCPP_INFO(node->get_logger(), "设置目标姿态 - %s", success ? "成功" : "失败");
+    // // ===== 测试 8: 设置目标姿态（Quaternion） =====
+    // RCLCPP_INFO(node->get_logger(), "\n[测试 8] 设置目标姿态（Quaternion）");
+    // geometry_msgs::msg::Quaternion target_quat = eef_cmd.rpy_to_quaternion(0.0, 0.0, 1.5708); // π/2
+    // success = eef_cmd.set_target(target_quat);
+    // RCLCPP_INFO(node->get_logger(), "设置目标姿态 - %s", success ? "成功" : "失败");
 
-    success = eef_cmd.plan_and_execute();
-    if(!success) {
-        RCLCPP_WARN(node->get_logger(), "姿态规划或执行失败");
-    }
-    else {
-        RCLCPP_INFO(node->get_logger(), "姿态运动执行完成");
-    }
+    // success = eef_cmd.plan_and_execute();
+    // if(!success) {
+    //     RCLCPP_WARN(node->get_logger(), "姿态规划或执行失败");
+    // }
+    // else {
+    //     RCLCPP_INFO(node->get_logger(), "姿态运动执行完成");
+    // }
 
-    // ===== 测试 9: 设置关节值 =====
-    RCLCPP_INFO(node->get_logger(), "\n[测试 9] 设置目标关节值");
-    std::vector<double> target_joints = { 0.0, 0.785398, 1.5708, 0.0, 1.5708, 0.0 };
-    success = eef_cmd.set_joints(target_joints);
-    RCLCPP_INFO(node->get_logger(), "设置关节值 - %s", success ? "成功" : "失败");
+    // // ===== 测试 9: 设置关节值 =====
+    // RCLCPP_INFO(node->get_logger(), "\n[测试 9] 设置目标关节值");
+    // std::vector<double> target_joints = { 0.0, 0.785398, 1.5708, 0.0, 1.5708, 0.0 };
+    // success = eef_cmd.set_joints(target_joints);
+    // RCLCPP_INFO(node->get_logger(), "设置关节值 - %s", success ? "成功" : "失败");
 
-    success = eef_cmd.plan_and_execute();
-    if(!success) {
-        RCLCPP_WARN(node->get_logger(), "关节值规划或执行失败");
-    }
-    else {
-        RCLCPP_INFO(node->get_logger(), "关节值运动执行完成");
-    }
+    // success = eef_cmd.plan_and_execute();
+    // if(!success) {
+    //     RCLCPP_WARN(node->get_logger(), "关节值规划或执行失败");
+    // }
+    // else {
+    //     RCLCPP_INFO(node->get_logger(), "关节值运动执行完成");
+    // }
 
-    // ===== 测试 10: 坐标系转换 =====
-    RCLCPP_INFO(node->get_logger(), "\n[测试 10] 坐标系转换 (Base -> End)");
-    geometry_msgs::msg::Pose test_pose;
-    test_pose.position.x = 0.5;
-    test_pose.position.y = 0.1;
-    test_pose.position.z = 0.3;
-    test_pose.orientation.x = 0.0;
-    test_pose.orientation.y = 0.0;
-    test_pose.orientation.z = 0.0;
-    test_pose.orientation.w = 1.0;
+    // // ===== 测试 10: 坐标系转换 =====
+    // RCLCPP_INFO(node->get_logger(), "\n[测试 10] 坐标系转换 (Base -> End)");
+    // geometry_msgs::msg::Pose test_pose;
+    // test_pose.position.x = 0.5;
+    // test_pose.position.y = 0.1;
+    // test_pose.position.z = 0.3;
+    // test_pose.orientation.x = 0.0;
+    // test_pose.orientation.y = 0.0;
+    // test_pose.orientation.z = 0.0;
+    // test_pose.orientation.w = 1.0;
 
-    geometry_msgs::msg::Pose end_pose;
-    if(eef_cmd.base_to_end_tf(test_pose, end_pose)) {
-        RCLCPP_INFO(node->get_logger(), "Base -> End 转换成功");
-        RCLCPP_INFO(node->get_logger(), "  转换前: (%.3f, %.3f, %.3f)",
-            test_pose.position.x, test_pose.position.y, test_pose.position.z);
-        RCLCPP_INFO(node->get_logger(), "  转换后: (%.3f, %.3f, %.3f)",
-            end_pose.position.x, end_pose.position.y, end_pose.position.z);
-    }
-    else {
-        RCLCPP_WARN(node->get_logger(), "Base -> End 转换失败");
-    }
+    // geometry_msgs::msg::Pose end_pose;
+    // if(eef_cmd.base_to_end_tf(test_pose, end_pose)) {
+    //     RCLCPP_INFO(node->get_logger(), "Base -> End 转换成功");
+    //     RCLCPP_INFO(node->get_logger(), "  转换前: (%.3f, %.3f, %.3f)",
+    //         test_pose.position.x, test_pose.position.y, test_pose.position.z);
+    //     RCLCPP_INFO(node->get_logger(), "  转换后: (%.3f, %.3f, %.3f)",
+    //         end_pose.position.x, end_pose.position.y, end_pose.position.z);
+    // }
+    // else {
+    //     RCLCPP_WARN(node->get_logger(), "Base -> End 转换失败");
+    // }
 
-    // ===== 测试 11: 反向坐标系转换 =====
-    RCLCPP_INFO(node->get_logger(), "\n[测试 11] 坐标系转换 (End -> Base)");
-    geometry_msgs::msg::Pose base_pose;
-    if(eef_cmd.end_to_base_tf(end_pose, base_pose)) {
-        RCLCPP_INFO(node->get_logger(), "End -> Base 转换成功");
-        RCLCPP_INFO(node->get_logger(), "  转换前: (%.3f, %.3f, %.3f)",
-            end_pose.position.x, end_pose.position.y, end_pose.position.z);
-        RCLCPP_INFO(node->get_logger(), "  转换后: (%.3f, %.3f, %.3f)",
-            base_pose.position.x, base_pose.position.y, base_pose.position.z);
-    }
-    else {
-        RCLCPP_WARN(node->get_logger(), "End -> Base 转换失败");
-    }
+    // // ===== 测试 11: 反向坐标系转换 =====
+    // RCLCPP_INFO(node->get_logger(), "\n[测试 11] 坐标系转换 (End -> Base)");
+    // geometry_msgs::msg::Pose base_pose;
+    // if(eef_cmd.end_to_base_tf(end_pose, base_pose)) {
+    //     RCLCPP_INFO(node->get_logger(), "End -> Base 转换成功");
+    //     RCLCPP_INFO(node->get_logger(), "  转换前: (%.3f, %.3f, %.3f)",
+    //         end_pose.position.x, end_pose.position.y, end_pose.position.z);
+    //     RCLCPP_INFO(node->get_logger(), "  转换后: (%.3f, %.3f, %.3f)",
+    //         base_pose.position.x, base_pose.position.y, base_pose.position.z);
+    // }
+    // else {
+    //     RCLCPP_WARN(node->get_logger(), "End -> Base 转换失败");
+    // }
 
-    // ===== 测试 12: 设置末端坐标系上的目标位置 =====
-    RCLCPP_INFO(node->get_logger(), "\n[测试 12] 设置末端坐标系上的目标位置");
-    geometry_msgs::msg::Point end_target_point;
-    end_target_point.x = 0.1;
-    end_target_point.y = 0.0;
-    end_target_point.z = 0.2;
-    success = eef_cmd.set_target_on_end(end_target_point);
-    RCLCPP_INFO(node->get_logger(), "设置末端坐标系目标位置 - %s", success ? "成功" : "失败");
+    // // ===== 测试 12: 设置末端坐标系上的目标位置 =====
+    // RCLCPP_INFO(node->get_logger(), "\n[测试 12] 设置末端坐标系上的目标位置");
+    // geometry_msgs::msg::Point end_target_point;
+    // end_target_point.x = 0.1;
+    // end_target_point.y = 0.0;
+    // end_target_point.z = 0.2;
+    // success = eef_cmd.set_target_on_end(end_target_point);
+    // RCLCPP_INFO(node->get_logger(), "设置末端坐标系目标位置 - %s", success ? "成功" : "失败");
 
-    success = eef_cmd.plan_and_execute();
-    if(!success) {
-        RCLCPP_WARN(node->get_logger(), "末端坐标系规划或执行失败");
-    }
-    else {
-        RCLCPP_INFO(node->get_logger(), "末端坐标系运动执行完成");
-    }
+    // success = eef_cmd.plan_and_execute();
+    // if(!success) {
+    //     RCLCPP_WARN(node->get_logger(), "末端坐标系规划或执行失败");
+    // }
+    // else {
+    //     RCLCPP_INFO(node->get_logger(), "末端坐标系运动执行完成");
+    // }
 
     // ===== 测试完成 =====
     RCLCPP_INFO(node->get_logger(), "所有测试完成");
