@@ -27,6 +27,8 @@ public:
     bool set_joints(const std::vector<double>& joint_values);
     bool set_target(const TargetVariant& target);
     bool set_target_on_end(const TargetVariant& target);
+    bool telescopic_end(double length);
+    bool rotate_end(double angle);
     bool plan();
     bool plan_and_execute();
 
