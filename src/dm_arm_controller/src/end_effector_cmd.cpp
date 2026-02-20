@@ -285,7 +285,7 @@ bool EndEffectorCmd::parameterize_time(moveit_msgs::msg::RobotTrajectory& trajec
         time_param_success = totg.computeTimeStamps(rt, vel_scale, acc_scale);
 
     }
-    else if(method == TimeParamMethod::SPLINE) {
+    else if(method == TimeParamMethod::ISP) {
         trajectory_processing::IterativeSplineParameterization isp;
         time_param_success = isp.computeTimeStamps(rt, vel_scale, acc_scale);
     }
@@ -409,11 +409,11 @@ DescartesResult EndEffectorCmd::set_line(const TargetVariant& start, const Targe
 }
 
 /**
- * @brief 规划并执行一条圆弧路径，如果传入的参数为位置，则保持当前姿态不变
+ * @brief 规划并执行一条二次贝塞尔曲线路径，如果传入的参数为位置，则保持当前姿态不变
  * @param start 起点目标（位姿或位置）
- * @param via 圆弧路径上的一个中间点（位姿或位置）
+ * @param via 曲线路径上的一个中间点（位姿或位置），用于定义曲线的形状
  * @param end 终点目标（位姿或位置）
- * @param arc_segments 圆弧路径的分段数（默认值为 30，表示将圆弧分成 30 段进行规划）
+ * @param curve_segments 曲线路径的分段数（默认值为 30，表示将曲线分成 30 段进行规划）
  * @param eef_step 末端执行器步长（单位：米，默认值为 0.01）
  * @param jump_threshold 跳跃阈值（单位：弧度，默认值为 0.0，表示禁用跳跃检测）
  * @param time_param_method 时间参数化方法（默认使用 TOTG）
@@ -421,7 +421,7 @@ DescartesResult EndEffectorCmd::set_line(const TargetVariant& start, const Targe
  * @param acc_scale 加速度缩放因子（默认值为 0.1）
  * @return 规划结果，包括是否成功、生成的轨迹和任何错误信息
  */
-DescartesResult EndEffectorCmd::set_circle(const TargetVariant& start, const TargetVariant& via, const TargetVariant& end, int arc_segments, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
+DescartesResult EndEffectorCmd::set_bezier_curve(const TargetVariant& start, const TargetVariant& via, const TargetVariant& end, int curve_segments, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
     // 将起点、途经点和终点转换为位姿
     geometry_msgs::msg::Pose start_pose;
     geometry_msgs::msg::Pose via_pose;
@@ -467,18 +467,20 @@ DescartesResult EndEffectorCmd::set_circle(const TargetVariant& start, const Tar
         return result;
     }
 
-    // 计算圆弧路径上的分段点
+    // 计算曲线路径上的分段点
     std::vector<geometry_msgs::msg::Pose> waypoints;
-    for(int i = 0; i <= arc_segments; ++i) {
-        double t = static_cast<double>(i) / arc_segments;
+    for(int i = 0; i <= curve_segments; ++i) {
+        double t = static_cast<double>(i) / curve_segments;
 
-        // 使用二次贝塞尔曲线公式计算圆弧路径上的点
+        // 使用二次贝塞尔曲线公式计算曲线路径上的点
         geometry_msgs::msg::Pose point;
         point.position.x = (1 - t) * (1 - t) * start_pose.position.x + 2 * (1 - t) * t * via_pose.position.x + t * t * end_pose.position.x;
         point.position.y = (1 - t) * (1 - t) * start_pose.position.y + 2 * (1 - t) * t * via_pose.position.y + t * t * end_pose.position.y;
         point.position.z = (1 - t) * (1 - t) * start_pose.position.z + 2 * (1 - t) * t * via_pose.position.z + t * t * end_pose.position.z;
 
-        tf2::Quaternion quat_start, quat_end, quat_interp;
+        // 对姿态进行球面线性插值
+        tf2::Quaternion quat_start, quat_end;
+        tf2::Quaternion quat_interp;
         tf2::fromMsg(start_pose.orientation, quat_start);
         tf2::fromMsg(end_pose.orientation, quat_end);
         quat_interp = quat_start.slerp(quat_end, t);
@@ -510,6 +512,93 @@ bool EndEffectorCmd::execute(const moveit_msgs::msg::RobotTrajectory& trajectory
 
     RCLCPP_INFO(_node_->get_logger(), "执行成功");
     return true;
+}
+
+/**
+ * @brief 设置末端执行器的姿态约束
+ * @param target_orientation 目标姿态（四元数）
+ * @param tolerance_x 姿态约束在 X 轴上的容忍度（单位：弧度，默认值为 0.1）
+ * @param tolerance_y 姿态约束在 Y 轴上的容忍度（单位：弧度，默认值为 0.1）
+ * @param tolerance_z 姿态约束在 Z 轴上的容忍度（单位：弧度，默认值为 0.3）
+ * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
+ */
+void EndEffectorCmd::set_orientation_constraint(const geometry_msgs::msg::Quaternion& target_orientation, double tolerance_x, double tolerance_y, double tolerance_z, double weight) {
+    moveit_msgs::msg::OrientationConstraint ocm;
+    ocm.link_name = _eef_link_;
+    ocm.header.frame_id = _base_link_;
+    ocm.orientation = target_orientation;
+    ocm.absolute_x_axis_tolerance = tolerance_x;
+    ocm.absolute_y_axis_tolerance = tolerance_y;
+    ocm.absolute_z_axis_tolerance = tolerance_z;
+    ocm.weight = weight;
+
+    _constraints_.orientation_constraints.push_back(ocm);
+    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器姿态约束");
+}
+
+/**
+ * @brief 设置末端执行器的位置约束
+ * @param target_position 目标位置
+ * @param scope_size 位置约束的范围大小（单位：米）
+ * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
+ */
+void EndEffectorCmd::set_position_constraint(const geometry_msgs::msg::Point& target_position, const geometry_msgs::msg::Vector3& scope_size, double weight) {
+    moveit_msgs::msg::PositionConstraint pcm;
+    pcm.link_name = _eef_link_;
+    pcm.header.frame_id = _base_link_;
+    pcm.target_point_offset.x = target_position.x;
+    pcm.target_point_offset.y = target_position.y;
+    pcm.target_point_offset.z = target_position.z;
+
+    shape_msgs::msg::SolidPrimitive bounding_volume;
+    bounding_volume.type = shape_msgs::msg::SolidPrimitive::BOX;
+    bounding_volume.dimensions.resize(3);
+    bounding_volume.dimensions[0] = scope_size.x;
+    bounding_volume.dimensions[1] = scope_size.y;
+    bounding_volume.dimensions[2] = scope_size.z;
+    pcm.constraint_region.primitives.push_back(bounding_volume);
+    pcm.constraint_region.primitive_poses.push_back(geometry_msgs::msg::Pose());
+    pcm.weight = weight;
+
+    _constraints_.position_constraints.push_back(pcm);
+    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器位置约束");
+}
+
+/**
+ * @brief 设置末端执行器的关节约束
+ * @param joint_name 需要约束的关节名称
+ * @param target_angle 目标关节角度（单位：弧度）
+ * @param upper 关节角度的上容忍度（单位：弧度，默认值为 0.1）
+ * @param lower 关节角度的下容忍度（单位：弧度，默认值为 0.1）
+ * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
+ */
+void EndEffectorCmd::set_joint_constraint(const std::string& joint_name, double target_angle, double upper, double lower, double weight) {
+    moveit_msgs::msg::JointConstraint jc;
+    jc.joint_name = joint_name;
+    jc.position = target_angle;
+    jc.tolerance_above = upper;
+    jc.tolerance_below = lower;
+    jc.weight = weight;
+
+    _constraints_.joint_constraints.push_back(jc);
+    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器关节约束");
+}
+
+/**
+ * @brief 应用所有姿态约束
+ */
+void EndEffectorCmd::apply_constraints() {
+    _arm_.setPathConstraints(_constraints_);
+    RCLCPP_INFO(_node_->get_logger(), "已应用所有姿态约束");
+}
+
+/**
+ * @brief 清除所有姿态约束
+ */
+void EndEffectorCmd::clear_constraints() {
+    _constraints_.orientation_constraints.clear();
+    _arm_.setPathConstraints(_constraints_);
+    RCLCPP_INFO(_node_->get_logger(), "已清除所有姿态约束");
 }
 
 /**
@@ -611,20 +700,20 @@ int main(int argc, char** argv) {
     //     RCLCPP_ERROR(node->get_logger(), "规划失败，错误信息：%s", result.message.c_str());
     // }
 
-    // ===== 测试 2: 用 SPLINE 规划圆弧 =====
-    RCLCPP_INFO(node->get_logger(), "测试 2: 用 SPLINE 规划圆弧");
+    // ===== 测试 2: 用 ISP 规划曲线 =====
+    RCLCPP_INFO(node->get_logger(), "测试 2: 用 ISP 规划曲线");
     geometry_msgs::msg::Pose via_pose = start_pose;
     start_pose.position.x += 0.2;
     start_pose.position.z += 0.1;
     via_pose.position.y += 0.4;
     via_pose.position.z += 0.1;
-    result = eef_cmd.set_circle(start_pose, via_pose, end_pose, 30, 0.01, 0.0, dm_arm::TimeParamMethod::SPLINE, 0.1, 0.4);
+    result = eef_cmd.set_bezier_curve(start_pose, via_pose, end_pose, 30, 0.01, 0.0, dm_arm::TimeParamMethod::ISP, 0.1, 0.4);
     if(result.success) {
-        RCLCPP_INFO(node->get_logger(), "圆弧规划成功，开始执行轨迹");
+        RCLCPP_INFO(node->get_logger(), "曲线规划成功，开始执行轨迹");
         eef_cmd.execute(result.trajectory);
     }
     else {
-        RCLCPP_ERROR(node->get_logger(), "圆弧规划失败，错误信息：%s", result.message.c_str());
+        RCLCPP_ERROR(node->get_logger(), "曲线规划失败，错误信息：%s", result.message.c_str());
     }
 
     // ===== 测试完成 =====

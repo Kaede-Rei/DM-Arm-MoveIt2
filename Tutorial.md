@@ -675,5 +675,134 @@ bool EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
 }
 ```
 
+## 4.4. 参数配置
+
+在功能包里增加 `config/params.yaml` 文件，并按照以下格式：
+
+```yaml
+/**:								# 表示所有节点均可使用
+  ros__parameters:					# 声明为 ros 的参数服务
+
+    motion_planning:				# 键值对
+      planning_time: 5.0			# 获取时用 "." 来表示包含
+      planning_attempts: 10			# 先声明再获取
+
+    target_tolerance:				# _node_->declare_parameter("tf.timeout", 0.1); 
+      position: 0.001				# a = _node_->get_parameter("tf.timeout", 0.1);
+      orientation: 0.01
+      joint: 0.01
+```
+
 # 5. 笛卡尔空间约束规划
+
+## 5.1. 笛卡尔路径规划 (Cartesian Path)
+
+​	在笛卡尔空间中，我们通常希望机械臂末端按照特定的几何轨迹（如直线、曲线）运动，而不是仅仅关心起点和终点；MoveIt2 提供了 `computeCartesianPath` 接口来实现这一功能
+
+-   **核心 API：**
+  
+    ```cpp
+    double success_rate = arm.computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory);
+    ```
+    -   `waypoints`：`std::vector<geometry_msgs::msg::Pose>`，包含一系列期望经过的路径点
+    -   `eef_step`：末端执行器在笛卡尔空间中的最大步长（如 `0.01` 米），MoveIt 会在路径点之间按此步长进行插值
+    -   `jump_threshold`：关节空间跳跃阈值（如 `0.0` 表示禁用）；用于防止逆运动学（IK）求解时相邻两点关节角度突变
+    -   `trajectory`：输出的轨迹（`moveit_msgs::msg::RobotTrajectory`）
+    -   **返回值**：`0.0 ~ 1.0` 之间的浮点数，表示成功规划的路径比例（`1.0` 表示 100% 成功）
+
+## 5.2. 轨迹时间参数化 (Time Parameterization)
+
+​	`computeCartesianPath` 生成的轨迹默认缺乏平滑的速度和加速度信息，直接执行可能会导致机械臂运动卡顿或报错。因此，必须对生成的轨迹进行**时间参数化**
+
+-   **依赖头文件：**
+    ```cpp
+    #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+    #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
+    #include <moveit/robot_trajectory/robot_trajectory.h>
+    ```
+
+-   **常用方法：**
+    1.  **TOTG (Time-Optimal Trajectory Generation)**：时间最优轨迹生成，速度较快，适合大多数场景
+    2.  **ISP (Iterative Spline Parameterization)**：迭代样条参数化，生成的轨迹更加平滑，但要求更严格且速度慢
+
+-   **代码：**
+  
+    ```cpp
+    // 将 moveit_msgs::msg::RobotTrajectory 转换为 robot_trajectory::RobotTrajectory
+    robot_trajectory::RobotTrajectory rt(arm.getRobotModel(), arm.getName());
+    rt.setRobotTrajectoryMsg(*arm.getCurrentState(), trajectory);
+    
+    // 选择时间参数化方法并计算时间戳
+    trajectory_processing::TimeOptimalTrajectoryGeneration totg;
+    bool success = totg.computeTimeStamps(rt, vel_scale, acc_scale);
+    
+    // 或者使用 ISP 方法：
+    // trajectory_processing::IterativeSplineParameterization isp;
+    // bool success = isp.computeTimeStamps(rt, vel_scale, acc_scale);
+    
+    // 将参数化后的轨迹转换回消息格式
+    rt.getRobotTrajectoryMsg(trajectory);
+    ```
+
+## 5.3. 直线与曲线轨迹示例
+
+### 5.3.1. 直线轨迹
+
+​	直线轨迹只需将起点和终点加入 `waypoints` ，MoveIt 会自动在两点间进行直线插值
+
+```cpp
+std::vector<geometry_msgs::msg::Pose> waypoints;
+waypoints.push_back(start_pose);
+waypoints.push_back(end_pose);
+
+moveit_msgs::msg::RobotTrajectory trajectory;
+double success_rate = arm.computeCartesianPath(waypoints, 0.01, 0.0, trajectory);
+```
+
+### 5.3.2. 曲线轨迹
+
+​	MoveIt 原生 API 不直接支持“画圆”，但我们可以通过数学公式（二次贝塞尔曲线或曲线插值）在起点、途经点和终点之间生成一系列离散的位姿点，然后交由 `computeCartesianPath` 处理
+
+​	二次贝塞尔曲线取一系列离散位置：$P(t)=(1−t)^2 \cdot P_0 + 2(1−t)t \cdot P_1+t^2 \cdot P_2, ~~~~~ t\in(0,1)$
+
+​	姿态由
+
+```cpp
+std::vector<geometry_msgs::msg::Pose> waypoints;
+int curve_segments = 30; // 分段数
+
+for(int i = 0; i <= curve_segments; ++i) {
+    double t = static_cast<double>(i) / curve_segments;
+    geometry_msgs::msg::Pose point;
+    
+    // 使用二次贝塞尔曲线公式计算曲线路径上的点
+    point.position.x = (1 - t) * (1 - t) * start_pose.position.x + 2 * (1 - t) * t * via_pose.position.x + t * t * end_pose.position.x;
+    point.position.y = (1 - t) * (1 - t) * start_pose.position.y + 2 * (1 - t) * t * via_pose.position.y + t * t * end_pose.position.y;
+    point.position.z = (1 - t) * (1 - t) * start_pose.position.z + 2 * (1 - t) * t * via_pose.position.z + t * t * end_pose.position.z;
+    
+    // 对姿态进行球面线性插值
+    tf2::Quaternion quat_start, quat_end, quat_interp;
+    tf2::fromMsg(start_pose.orientation, quat_start);
+    tf2::fromMsg(end_pose.orientation, quat_end);
+    quat_interp = quat_start.slerp(quat_end, t);
+    quat_interp.normalize();
+    point.orientation = tf2::toMsg(quat_interp);
+    
+    waypoints.push_back(point);
+}
+
+// 规划笛卡尔路径
+moveit_msgs::msg::RobotTrajectory trajectory;
+double success_rate = arm.computeCartesianPath(waypoints, 0.01, 0.0, trajectory);
+```
+
+### 5.3.3. 执行轨迹
+
+经过时间参数化后的轨迹，可以直接通过 `execute` 接口执行：
+
+```cpp
+moveit::planning_interface::MoveGroupInterface::Plan plan;
+plan.trajectory_ = trajectory; // 赋值参数化后的轨迹
+moveit::core::MoveItErrorCode err_code = arm.execute(plan);
+```
 

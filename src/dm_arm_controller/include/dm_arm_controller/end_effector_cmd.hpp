@@ -41,15 +41,15 @@ typedef struct {
 /**
  * @brief TimeParamMethod 枚举类：用于指定时间参数化的方法，包括 TOTG（Time-Optimal Trajectory Generation）和 SPLINE（基于样条插值的时间参数化）
  * @param TOTG 使用时间最优轨迹生成算法进行时间参数化，适用于需要快速执行的场景
- * @param SPLINE 使用基于样条插值的时间参数化方法，适用于需要平滑运动的场景，可能会牺牲一些执行速度以获得更平滑的轨迹
+ * @param ISP 使用基于样条插值的时间参数化方法，适用于需要平滑运动的场景，可能会牺牲一些执行速度以获得更平滑的轨迹
  */
 enum class TimeParamMethod {
     TOTG,
-    SPLINE,
+    ISP,
 };
 
 /**
- * @brief EndEffectorCmd 类：提供一个接口来设置机械臂末端执行器的目标位姿、位置或姿态
+ * @brief EndEffectorCmd 类：用于规划末端执行器的运动
  */
 class EndEffectorCmd {
 public:
@@ -70,8 +70,14 @@ public:
     bool parameterize_time(moveit_msgs::msg::RobotTrajectory& trajectory, TimeParamMethod method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
     DescartesResult plan_decartes(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step = 0.01, double jump_threshold = 0.0, TimeParamMethod time_param_method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
     DescartesResult set_line(const TargetVariant& start, const TargetVariant& end, double eef_step = 0.01, double jump_threshold = 0.0, TimeParamMethod time_param_method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
-    DescartesResult set_circle(const TargetVariant& start, const TargetVariant& via, const TargetVariant& end, int arc_segments = 30, double eef_step = 0.01, double jump_threshold = 0.0, TimeParamMethod time_param_method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
+    DescartesResult set_bezier_curve(const TargetVariant& start, const TargetVariant& via, const TargetVariant& end, int curve_segments = 30, double eef_step = 0.01, double jump_threshold = 0.0, TimeParamMethod time_param_method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
     bool execute(const moveit_msgs::msg::RobotTrajectory& trajectory);
+
+    void set_orientation_constraint(const geometry_msgs::msg::Quaternion& target_orientation, double tolerance_x = 0.1, double tolerance_y = 0.1, double tolerance_z = 0.3, double weight = 1.0);
+    void set_position_constraint(const geometry_msgs::msg::Point& target_position, const geometry_msgs::msg::Vector3& scope_size, double weight = 1.0);
+    void set_joint_constraint(const std::string& joint_name, double target_angle, double upper, double lower, double weight = 1.0);
+    void apply_constraints();
+    void clear_constraints();
 
     geometry_msgs::msg::Quaternion rpy_to_quaternion(double roll, double pitch, double yaw);
     geometry_msgs::msg::Pose rpy_to_pose(double roll, double pitch, double yaw, double x, double y, double z);
@@ -94,13 +100,13 @@ private:
     const std::string& _base_link_;
     const std::string& _eef_link_;
 
-    moveit_msgs::msg::Constraints _constraints_;
-
     double _vel_scale_;
     double _acc_scale_;
     double _eef_step_;
     double _jump_threshold_;
     double _min_success_rate_;
+
+    moveit_msgs::msg::Constraints _constraints_;
 };
 
 
