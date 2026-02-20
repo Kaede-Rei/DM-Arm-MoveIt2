@@ -8,7 +8,41 @@
 
 namespace dm_arm {
 
+
 // ! ========================= 接 口 变 量 / Typedef 声 明 ========================= ! //
+
+/**
+ * @brief ErrorCode 枚举类：用于表示末端执行器命令执行过程中可能出现的各种错误情况
+ * @param SUCCESS 表示操作成功完成
+ * @param ASYNC_TASK_RUNNING 表示当前已有异步任务正在执行，无法执行新任务
+ * @param INVALID_TARGET_TYPE 表示提供的目标类型无效，无法识别或处理
+ * @param TF_TRANSFORM_FAILED 表示坐标变换失败，可能是由于TF树中缺少必要的变换或变换数据不正确导致
+ * @param PLANNING_FAILED 表示规划失败，可能是由于环境约束、目标不可达或其他规划问题导致的
+ * @param EXECUTION_FAILED 表示执行失败，可能是由于机器人状态不允许执行、执行过程中发生错误或其他执行问题导致的
+ * @param TIME_PARAM_FAILED 表示时间参数化失败，可能是由于轨迹不可行、参数化算法失败或其他时间参数化问题导致的
+ * @param EMPTY_WAYPOINTS 表示提供的路径点列表为空，无法进行规划
+ * @param DESCARTES_PLANNING_FAILED 表示笛卡尔空间规划失败，可能是由于路径点不可达、规划算法失败或其他笛卡尔规划问题导致
+ * @param TARGET_OUT_OF_BOUNDS 表示目标超出机器人工作空间或关节限制，无法执行
+ */
+enum class ErrorCode {
+    SUCCESS = 0,
+    ASYNC_TASK_RUNNING,
+    INVALID_TARGET_TYPE,
+    TF_TRANSFORM_FAILED,
+    PLANNING_FAILED,
+    EXECUTION_FAILED,
+    TIME_PARAM_FAILED,
+    EMPTY_WAYPOINTS,
+    DESCARTES_PLANNING_FAILED,
+    TARGET_OUT_OF_BOUNDS
+};
+
+/**
+ * @brief err_to_string 函数：将 ErrorCode 枚举值转换为对应的字符串表示，便于日志记录和调试
+ * @param code 要转换的 ErrorCode 枚举值
+ * @return 对应的字符串表示，例如 "SUCCESS"、"PLANNING_FAILED"
+ */
+std::string err_to_string(ErrorCode code);
 
 /**
  * @brief 目标类型：位姿（Pose）、位置（Point）、姿态（Quaternion）或带时间戳的位姿（PoseStamped）
@@ -32,7 +66,7 @@ using TargetVariant = std::variant<
  * @param trajectory 笛卡尔空间规划得到的轨迹，包含关节空间和笛卡尔空间的轨迹信息
  */
 typedef struct {
-    bool success;
+    ErrorCode error_code;
     double success_rate;
     std::string message;
     moveit_msgs::msg::RobotTrajectory trajectory;
@@ -54,37 +88,42 @@ enum class TimeParamMethod {
 class EndEffectorCmd {
 public:
     EndEffectorCmd(rclcpp::Node::SharedPtr node, const std::string& group_name);
-    ~EndEffectorCmd() = default;
+    ~EndEffectorCmd();
 
     void home();
-    bool set_joints(const std::vector<double>& joint_values);
-    bool set_target(const TargetVariant& target);
-    bool set_target_on_end(const TargetVariant& target);
+    ErrorCode set_joints(const std::vector<double>& joint_values);
+    ErrorCode set_target(const TargetVariant& target);
+    ErrorCode set_target_on_end(const TargetVariant& target);
     void clear_target();
-    bool telescopic_end(double length);
-    bool rotate_end(double angle);
-    bool plan();
-    bool plan_and_execute();
+    ErrorCode telescopic_end(double length);
+    ErrorCode rotate_end(double angle);
+    ErrorCode plan();
+    ErrorCode plan_and_execute();
+    ErrorCode async_plan_and_execute(std::function<void(ErrorCode)> callback = nullptr);
     void stop();
 
-    bool parameterize_time(moveit_msgs::msg::RobotTrajectory& trajectory, TimeParamMethod method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
+    ErrorCode parameterize_time(moveit_msgs::msg::RobotTrajectory& trajectory, TimeParamMethod method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
     DescartesResult plan_decartes(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step = 0.01, double jump_threshold = 0.0, TimeParamMethod time_param_method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
     DescartesResult set_line(const TargetVariant& start, const TargetVariant& end, double eef_step = 0.01, double jump_threshold = 0.0, TimeParamMethod time_param_method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
     DescartesResult set_bezier_curve(const TargetVariant& start, const TargetVariant& via, const TargetVariant& end, int curve_segments = 30, double eef_step = 0.01, double jump_threshold = 0.0, TimeParamMethod time_param_method = TimeParamMethod::TOTG, double vel_scale = 0.1, double acc_scale = 0.1);
-    bool execute(const moveit_msgs::msg::RobotTrajectory& trajectory);
+    ErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory);
+    ErrorCode async_execute(const moveit_msgs::msg::RobotTrajectory& trajectory, std::function<void(ErrorCode)> callback = nullptr);
 
     void set_orientation_constraint(const geometry_msgs::msg::Quaternion& target_orientation, double tolerance_x = 0.1, double tolerance_y = 0.1, double tolerance_z = 0.3, double weight = 1.0);
     void set_position_constraint(const geometry_msgs::msg::Point& target_position, const geometry_msgs::msg::Vector3& scope_size, double weight = 1.0);
-    void set_joint_constraint(const std::string& joint_name, double target_angle, double upper, double lower, double weight = 1.0);
+    void set_joint_constraint(const std::string& joint_name, double target_angle, double above, double below, double weight = 1.0);
     void apply_constraints();
     void clear_constraints();
+
+    bool is_planning_or_executing() const;
+    ErrorCode cancel_async();
 
     geometry_msgs::msg::Quaternion rpy_to_quaternion(double roll, double pitch, double yaw);
     geometry_msgs::msg::Pose rpy_to_pose(double roll, double pitch, double yaw, double x, double y, double z);
     template<class T>
-    bool base_to_end_tf(const T& in, T& out);
+    ErrorCode base_to_end_tf(const T& in, T& out);
     template<class T>
-    bool end_to_base_tf(const T& in, T& out);
+    ErrorCode end_to_base_tf(const T& in, T& out);
 
     std::vector<double> get_current_joints() const;
     std::vector<std::string> get_current_link_names() const;
@@ -107,6 +146,9 @@ private:
     double _min_success_rate_;
 
     moveit_msgs::msg::Constraints _constraints_;
+
+    std::atomic<bool> _is_planning_or_executing_{ false };
+    std::thread _async_thread_;
 };
 
 
@@ -123,7 +165,7 @@ private:
  * @return 转换是否成功
  */
 template<class T>
-bool EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
+ErrorCode EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
     // 检查输入类型
     static_assert(
         std::is_same_v<T, geometry_msgs::msg::Pose> ||
@@ -169,11 +211,11 @@ bool EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
             }
         }
         RCLCPP_INFO(_node_->get_logger(), "坐标变换成功：%s -> %s", _base_link_.c_str(), _eef_link_.c_str());
-        return true;
+        return ErrorCode::SUCCESS;
     }
     catch(const tf2::TransformException& e) {
-        RCLCPP_ERROR(_node_->get_logger(), "坐标变换失败：%s", e.what());
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "坐标变换失败：%s", e.what());
+        return ErrorCode::TF_TRANSFORM_FAILED;
     }
 }
 
@@ -184,7 +226,7 @@ bool EndEffectorCmd::base_to_end_tf(const T& in, T& out) {
  * @return 转换是否成功
  */
 template<class T>
-bool EndEffectorCmd::end_to_base_tf(const T& in, T& out) {
+ErrorCode EndEffectorCmd::end_to_base_tf(const T& in, T& out) {
     // 检查输入类型
     static_assert(
         std::is_same_v<T, geometry_msgs::msg::Pose> ||
@@ -230,11 +272,11 @@ bool EndEffectorCmd::end_to_base_tf(const T& in, T& out) {
             }
         }
         RCLCPP_INFO(_node_->get_logger(), "坐标变换成功：%s -> %s", _eef_link_.c_str(), _base_link_.c_str());
-        return true;
+        return ErrorCode::SUCCESS;
     }
     catch(const tf2::TransformException& e) {
-        RCLCPP_ERROR(_node_->get_logger(), "坐标变换失败：%s", e.what());
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "坐标变换失败：%s", e.what());
+        return ErrorCode::TF_TRANSFORM_FAILED;
     }
 }
 

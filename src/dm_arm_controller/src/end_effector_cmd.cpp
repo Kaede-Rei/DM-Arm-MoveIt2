@@ -20,6 +20,22 @@ static void shutdown_thread(std::thread& spin_thread);
 
 namespace dm_arm {
 
+std::string err_to_string(ErrorCode code) {
+    switch(code) {
+        case ErrorCode::SUCCESS: return "SUCCESS";
+        case ErrorCode::ASYNC_TASK_RUNNING: return "ASYNC_TASK_RUNNING";
+        case ErrorCode::INVALID_TARGET_TYPE: return "INVALID_TARGET_TYPE";
+        case ErrorCode::TF_TRANSFORM_FAILED: return "TF_TRANSFORM_FAILED";
+        case ErrorCode::PLANNING_FAILED: return "PLANNING_FAILED";
+        case ErrorCode::EXECUTION_FAILED: return "EXECUTION_FAILED";
+        case ErrorCode::TIME_PARAM_FAILED: return "TIME_PARAM_FAILED";
+        case ErrorCode::EMPTY_WAYPOINTS: return "EMPTY_WAYPOINTS";
+        case ErrorCode::DESCARTES_PLANNING_FAILED: return "DESCARTES_PLANNING_FAILED";
+        case ErrorCode::TARGET_OUT_OF_BOUNDS: return "TARGET_OUT_OF_BOUNDS";
+        default: return "UNKNOWN_ERROR";
+    }
+}
+
 /**
  * @brief EndEffectorCmd 构造函数：初始化 MoveGroupInterface 并打印规划帧信息
  * @param node 共享指针，指向 ROS 2 节点
@@ -83,7 +99,16 @@ EndEffectorCmd::EndEffectorCmd(rclcpp::Node::SharedPtr node, const std::string& 
         }
     }
     catch(const tf2::TransformException& e) {
-        RCLCPP_ERROR(_node_->get_logger(), "检查 TF 变换时发生异常：%s", e.what());
+        RCLCPP_WARN(_node_->get_logger(), "检查 TF 变换时发生异常：%s", e.what());
+    }
+}
+
+/**
+ * @brief EndEffectorCmd 析构函数：等待异步线程结束
+ */
+EndEffectorCmd::~EndEffectorCmd() {
+    if(_async_thread_.joinable()) {
+        _async_thread_.join();
     }
 }
 
@@ -101,8 +126,13 @@ void EndEffectorCmd::home() {
  * @param joint_values 目标关节值的向量
  * @return 设置是否成功
  */
-bool EndEffectorCmd::set_joints(const std::vector<double>& joint_values) {
-    return _arm_.setJointValueTarget(joint_values);
+ErrorCode EndEffectorCmd::set_joints(const std::vector<double>& joint_values) {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法设置新目标");
+        return ErrorCode::ASYNC_TASK_RUNNING;
+    }
+    bool success = _arm_.setJointValueTarget(joint_values);
+    return success ? ErrorCode::SUCCESS : ErrorCode::TARGET_OUT_OF_BOUNDS;
 }
 
 /**
@@ -110,7 +140,12 @@ bool EndEffectorCmd::set_joints(const std::vector<double>& joint_values) {
  * @param target 目标位姿、位置或姿态(geometry_msgs::msg::Pose / geometry_msgs::msg::Point / geometry_msgs::msg::Quaternion)
  * @return 设置是否成功
  */
-bool EndEffectorCmd::set_target(const TargetVariant& target) {
+ErrorCode EndEffectorCmd::set_target(const TargetVariant& target) {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法设置新目标");
+        return ErrorCode::ASYNC_TASK_RUNNING;
+    }
+
     bool success = false;
 
     if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&target)) {
@@ -130,11 +165,11 @@ bool EndEffectorCmd::set_target(const TargetVariant& target) {
         RCLCPP_INFO(_node_->get_logger(), "设置目标位姿（带时间戳）是否成功：%s", success ? "是" : "否");
     }
     else {
-        RCLCPP_ERROR(_node_->get_logger(), "不支持的目标类型：%s", typeid(target).name());
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "不支持的目标类型：%s", typeid(target).name());
+        return ErrorCode::INVALID_TARGET_TYPE;
     }
 
-    return success;
+    return success ? ErrorCode::SUCCESS : ErrorCode::TARGET_OUT_OF_BOUNDS;
 }
 
 /**
@@ -142,7 +177,12 @@ bool EndEffectorCmd::set_target(const TargetVariant& target) {
  * @param target 目标位姿、位置或姿态(geometry_msgs::msg::Pose / geometry_msgs::msg::Point / geometry_msgs::msg::Quaternion)
  * @return 设置是否成功
  */
-bool EndEffectorCmd::set_target_on_end(const TargetVariant& target) {
+ErrorCode EndEffectorCmd::set_target_on_end(const TargetVariant& target) {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法设置新目标");
+        return ErrorCode::ASYNC_TASK_RUNNING;
+    }
+
     bool success = false;
 
     if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&target)) {
@@ -170,17 +210,21 @@ bool EndEffectorCmd::set_target_on_end(const TargetVariant& target) {
         RCLCPP_INFO(_node_->get_logger(), "设置末端坐标系目标位姿（带时间戳）是否成功：%s", success ? "是" : "否");
     }
     else {
-        RCLCPP_ERROR(_node_->get_logger(), "不支持的目标类型：%s", typeid(target).name());
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "不支持的目标类型：%s", typeid(target).name());
+        return ErrorCode::INVALID_TARGET_TYPE;
     }
 
-    return success;
+    return success ? ErrorCode::SUCCESS : ErrorCode::TARGET_OUT_OF_BOUNDS;
 }
 
 /**
  * @brief 清除所有目标位姿、位置和姿态
  */
 void EndEffectorCmd::clear_target() {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法清除目标");
+        return;
+    }
     _arm_.clearPoseTargets();
     RCLCPP_INFO(_node_->get_logger(), "已清除所有目标位姿");
 }
@@ -190,7 +234,7 @@ void EndEffectorCmd::clear_target() {
  * @param length 伸缩长度（正值表示伸长，负值表示缩短）
  * @return 伸缩是否成功
  */
-bool EndEffectorCmd::telescopic_end(double length) {
+ErrorCode EndEffectorCmd::telescopic_end(double length) {
     geometry_msgs::msg::Pose point;
     point.position.x = 0.0;
     point.position.y = 0.0;
@@ -205,7 +249,7 @@ bool EndEffectorCmd::telescopic_end(double length) {
  * @param angle 旋转角度（单位：弧度，正值表示逆时针旋转，负值表示顺时针旋转）
  * @return 旋转是否成功
  */
-bool EndEffectorCmd::rotate_end(double angle) {
+ErrorCode EndEffectorCmd::rotate_end(double angle) {
     geometry_msgs::msg::Pose pose;
     pose = rpy_to_pose(0.0, 0.0, angle, 0.0, 0.0, 0.0);
 
@@ -216,45 +260,101 @@ bool EndEffectorCmd::rotate_end(double angle) {
  * @brief 规划运动
  * @return 规划是否成功
  */
-bool EndEffectorCmd::plan() {
+ErrorCode EndEffectorCmd::plan() {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法进行新的规划");
+        return ErrorCode::ASYNC_TASK_RUNNING;
+    }
+
     RCLCPP_INFO(_node_->get_logger(), "正在规划...");
 
     moveit::planning_interface::MoveGroupInterface::Plan plan;
 
     moveit::core::MoveItErrorCode err_code = _arm_.plan(plan);
     if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
-        RCLCPP_ERROR(_node_->get_logger(), "规划失败，错误码：%d", err_code.val);
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "规划失败，错误码：%d", err_code.val);
+        return ErrorCode::PLANNING_FAILED;
     }
 
     RCLCPP_INFO(_node_->get_logger(), "规划成功");
-    return true;
+    return ErrorCode::SUCCESS;
 }
 
 /**
  * @brief 规划并执行运动
  * @return 规划和执行是否成功
  */
-bool EndEffectorCmd::plan_and_execute() {
+ErrorCode EndEffectorCmd::plan_and_execute() {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法进行新的规划和执行");
+        return ErrorCode::ASYNC_TASK_RUNNING;
+    }
+
     RCLCPP_INFO(_node_->get_logger(), "正在规划...");
 
     moveit::planning_interface::MoveGroupInterface::Plan plan;
 
     moveit::core::MoveItErrorCode err_code = _arm_.plan(plan);
     if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
-        RCLCPP_ERROR(_node_->get_logger(), "规划失败，错误码：%d", err_code.val);
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "规划失败，错误码：%d", err_code.val);
+        return ErrorCode::PLANNING_FAILED;
     }
 
     RCLCPP_INFO(_node_->get_logger(), "规划成功，正在执行...");
     err_code = _arm_.execute(plan);
     if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
-        RCLCPP_ERROR(_node_->get_logger(), "执行失败，错误码：%d", err_code.val);
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "执行失败，错误码：%d", err_code.val);
+        return ErrorCode::EXECUTION_FAILED;
     }
 
     RCLCPP_INFO(_node_->get_logger(), "执行成功");
-    return true;
+    return ErrorCode::SUCCESS;
+}
+
+/**
+ * @brief 异步规划并执行运动
+ * @param callback 可选的回调函数，在规划和执行完成后调用，参数为 bool 类型，表示规划和执行是否成功，返回值为 void
+ * @return 是否成功启动异步规划和执行
+ */
+ErrorCode EndEffectorCmd::async_plan_and_execute(std::function<void(ErrorCode)> callback) {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，请稍后再试");
+        return ErrorCode::ASYNC_TASK_RUNNING;
+    }
+
+    if(_async_thread_.joinable()) {
+        _async_thread_.join();
+    }
+
+    _is_planning_or_executing_ = true;
+    RCLCPP_INFO(_node_->get_logger(), "正在异步规划...");
+
+    // 启动一个新的线程来执行规划和执行
+    _async_thread_ = std::thread([this, callback]() {
+        moveit::planning_interface::MoveGroupInterface::Plan plan;
+        moveit::core::MoveItErrorCode err_code = _arm_.plan(plan);
+        if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
+            RCLCPP_WARN(_node_->get_logger(), "异步规划失败，错误码：%d", err_code.val);
+            _is_planning_or_executing_ = false;
+            if(callback) callback(ErrorCode::PLANNING_FAILED);
+        }
+        else {
+            RCLCPP_INFO(_node_->get_logger(), "异步规划成功，正在执行...");
+            err_code = _arm_.execute(plan);
+            if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
+                RCLCPP_WARN(_node_->get_logger(), "异步执行失败，错误码：%d", err_code.val);
+                _is_planning_or_executing_ = false;
+                if(callback) callback(ErrorCode::EXECUTION_FAILED);
+            }
+            else {
+                RCLCPP_INFO(_node_->get_logger(), "异步执行成功");
+                _is_planning_or_executing_ = false;
+                if(callback) callback(ErrorCode::SUCCESS);
+            }
+        }
+        });
+
+    return ErrorCode::SUCCESS;
 }
 
 /**
@@ -273,7 +373,7 @@ void EndEffectorCmd::stop() {
  * @param acc_scale 加速度缩放因子（默认值为 0.1）
  * @return 时间参数化是否成功
  */
-bool EndEffectorCmd::parameterize_time(moveit_msgs::msg::RobotTrajectory& trajectory, TimeParamMethod method, double vel_scale, double acc_scale) {
+ErrorCode EndEffectorCmd::parameterize_time(moveit_msgs::msg::RobotTrajectory& trajectory, TimeParamMethod method, double vel_scale, double acc_scale) {
     // 创建 robot_trajectory::RobotTrajectory 对象
     robot_trajectory::RobotTrajectory rt(_arm_.getRobotModel(), _arm_.getName());
     rt.setRobotTrajectoryMsg(*_arm_.getCurrentState(), trajectory);
@@ -290,18 +390,18 @@ bool EndEffectorCmd::parameterize_time(moveit_msgs::msg::RobotTrajectory& trajec
         time_param_success = isp.computeTimeStamps(rt, vel_scale, acc_scale);
     }
     else {
-        RCLCPP_ERROR(_node_->get_logger(), "无效的时间参数化方法");
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "无效的时间参数化方法");
+        return ErrorCode::TIME_PARAM_FAILED;
     }
 
     if(!time_param_success) {
-        RCLCPP_ERROR(_node_->get_logger(), "时间参数化失败");
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "时间参数化失败");
+        return ErrorCode::TIME_PARAM_FAILED;
     }
 
     // 将时间参数化后的轨迹转换回消息格式
     rt.getRobotTrajectoryMsg(trajectory);
-    return true;
+    return ErrorCode::SUCCESS;
 }
 
 /**
@@ -316,9 +416,15 @@ bool EndEffectorCmd::parameterize_time(moveit_msgs::msg::RobotTrajectory& trajec
  */
 DescartesResult EndEffectorCmd::plan_decartes(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step, double jump_threshold, TimeParamMethod time_param_method, double vel_scale, double acc_scale) {
     DescartesResult result;
-    result.success = false;
+    result.error_code = ErrorCode::SUCCESS;
+
+    if(_is_planning_or_executing_) {
+        result.message = "当前已有异步任务正在执行，无法进行新的笛卡尔规划";
+        return result;
+    }
 
     if(waypoints.empty()) {
+        result.error_code = ErrorCode::EMPTY_WAYPOINTS;
         result.message = "路径点列表为空";
         return result;
     }
@@ -329,25 +435,27 @@ DescartesResult EndEffectorCmd::plan_decartes(const std::vector<geometry_msgs::m
     result.success_rate = success_rate;
 
     if(success_rate <= 0.0) {
+        result.error_code = ErrorCode::DESCARTES_PLANNING_FAILED;
         result.message = "笛卡尔路径规划失败，无法生成有效的轨迹";
         return result;
     }
 
     // 时间参数化
-    if(!parameterize_time(trajectory, time_param_method, vel_scale, acc_scale)) {
+    if(parameterize_time(trajectory, time_param_method, vel_scale, acc_scale) != ErrorCode::SUCCESS) {
+        result.error_code = ErrorCode::TIME_PARAM_FAILED;
         result.message = "时间参数化失败";
         return result;
     }
     result.trajectory = trajectory;
 
     if(success_rate < _min_success_rate_) {
-        result.success = false;
+        result.error_code = ErrorCode::SUCCESS;
         std::stringstream ss;
         ss << "笛卡尔路径规划失败，成功率：" << (success_rate * 100.0) << "%";
         result.message = ss.str();
     }
     else {
-        result.success = true;
+        result.error_code = ErrorCode::SUCCESS;
         std::stringstream ss;
         ss << "笛卡尔路径规划成功，成功率：" << (success_rate * 100.0) << "%";
         result.message = ss.str();
@@ -381,7 +489,7 @@ DescartesResult EndEffectorCmd::set_line(const TargetVariant& start, const Targe
     }
     else {
         DescartesResult result;
-        result.success = false;
+        result.error_code = ErrorCode::SUCCESS;
         result.message = "无效的起点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -394,7 +502,7 @@ DescartesResult EndEffectorCmd::set_line(const TargetVariant& start, const Targe
     }
     else {
         DescartesResult result;
-        result.success = false;
+        result.error_code = ErrorCode::SUCCESS;
         result.message = "无效的终点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -436,7 +544,7 @@ DescartesResult EndEffectorCmd::set_bezier_curve(const TargetVariant& start, con
     }
     else {
         DescartesResult result;
-        result.success = false;
+        result.error_code = ErrorCode::SUCCESS;
         result.message = "无效的起点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -449,7 +557,7 @@ DescartesResult EndEffectorCmd::set_bezier_curve(const TargetVariant& start, con
     }
     else {
         DescartesResult result;
-        result.success = false;
+        result.error_code = ErrorCode::SUCCESS;
         result.message = "无效的途经点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -462,7 +570,7 @@ DescartesResult EndEffectorCmd::set_bezier_curve(const TargetVariant& start, con
     }
     else {
         DescartesResult result;
-        result.success = false;
+        result.error_code = ErrorCode::SUCCESS;
         result.message = "无效的终点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -498,7 +606,12 @@ DescartesResult EndEffectorCmd::set_bezier_curve(const TargetVariant& start, con
  * @param trajectory 预设的运动轨迹
  * @return 规划和执行是否成功
  */
-bool EndEffectorCmd::execute(const moveit_msgs::msg::RobotTrajectory& trajectory) {
+ErrorCode EndEffectorCmd::execute(const moveit_msgs::msg::RobotTrajectory& trajectory) {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，无法执行新轨迹");
+        return ErrorCode::ASYNC_TASK_RUNNING;
+    }
+
     RCLCPP_INFO(_node_->get_logger(), "正在按预设轨迹执行...");
 
     moveit::planning_interface::MoveGroupInterface::Plan plan;
@@ -506,12 +619,52 @@ bool EndEffectorCmd::execute(const moveit_msgs::msg::RobotTrajectory& trajectory
 
     moveit::core::MoveItErrorCode err_code = _arm_.execute(plan);
     if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
-        RCLCPP_ERROR(_node_->get_logger(), "执行失败，错误码：%d", err_code.val);
-        return false;
+        RCLCPP_WARN(_node_->get_logger(), "执行失败，错误码：%d", err_code.val);
+        return ErrorCode::EXECUTION_FAILED;
     }
 
     RCLCPP_INFO(_node_->get_logger(), "执行成功");
-    return true;
+    return ErrorCode::SUCCESS;
+}
+
+/**
+ * @brief 异步按预设轨迹执行运动
+ * @param trajectory 预设的运动轨迹
+ * @param callback 可选的回调函数，在执行完成后调用，参数为 bool 类型，表示执行是否成功，返回值为 void
+ * @return 是否成功启动异步执行
+ */
+ErrorCode EndEffectorCmd::async_execute(const moveit_msgs::msg::RobotTrajectory& trajectory, std::function<void(ErrorCode)> callback) {
+    if(_is_planning_or_executing_) {
+        RCLCPP_WARN(_node_->get_logger(), "当前已有异步任务正在执行，请稍后再试");
+        return ErrorCode::ASYNC_TASK_RUNNING;
+    }
+
+    if(_async_thread_.joinable()) {
+        _async_thread_.join();
+    }
+
+    _is_planning_or_executing_ = true;
+    RCLCPP_INFO(_node_->get_logger(), "正在异步按预设轨迹执行...");
+
+    // 启动一个新的线程来执行轨迹
+    _async_thread_ = std::thread([this, trajectory, callback]() {
+        moveit::planning_interface::MoveGroupInterface::Plan plan;
+        plan.trajectory_ = trajectory;
+
+        moveit::core::MoveItErrorCode err_code = _arm_.execute(plan);
+        if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
+            RCLCPP_WARN(_node_->get_logger(), "异步执行失败，错误码：%d", err_code.val);
+            _is_planning_or_executing_ = false;
+            if(callback) callback(ErrorCode::PLANNING_FAILED);
+        }
+        else {
+            RCLCPP_INFO(_node_->get_logger(), "异步执行成功");
+            _is_planning_or_executing_ = false;
+            if(callback) callback(ErrorCode::SUCCESS);
+        }
+        });
+
+    return ErrorCode::SUCCESS;
 }
 
 /**
@@ -523,17 +676,24 @@ bool EndEffectorCmd::execute(const moveit_msgs::msg::RobotTrajectory& trajectory
  * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
  */
 void EndEffectorCmd::set_orientation_constraint(const geometry_msgs::msg::Quaternion& target_orientation, double tolerance_x, double tolerance_y, double tolerance_z, double weight) {
+    // 创建姿态约束对象
     moveit_msgs::msg::OrientationConstraint ocm;
     ocm.link_name = _eef_link_;
     ocm.header.frame_id = _base_link_;
+    ocm.header.stamp = _node_->now();
+
+    // 设置目标姿态和容忍度
     ocm.orientation = target_orientation;
     ocm.absolute_x_axis_tolerance = tolerance_x;
     ocm.absolute_y_axis_tolerance = tolerance_y;
     ocm.absolute_z_axis_tolerance = tolerance_z;
     ocm.weight = weight;
 
+    // 将姿态约束添加到约束列表中
     _constraints_.orientation_constraints.push_back(ocm);
-    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器姿态约束");
+    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器姿态约束，目标姿态：(%f, %f, %f, %f)，容忍度：(%f, %f, %f)，权重：%f",
+        target_orientation.x, target_orientation.y, target_orientation.z, target_orientation.w,
+        tolerance_x, tolerance_y, tolerance_z, weight);
 }
 
 /**
@@ -543,25 +703,31 @@ void EndEffectorCmd::set_orientation_constraint(const geometry_msgs::msg::Quater
  * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
  */
 void EndEffectorCmd::set_position_constraint(const geometry_msgs::msg::Point& target_position, const geometry_msgs::msg::Vector3& scope_size, double weight) {
+    // 创建位置约束对象
     moveit_msgs::msg::PositionConstraint pcm;
     pcm.link_name = _eef_link_;
     pcm.header.frame_id = _base_link_;
+    pcm.header.stamp = _node_->now();
+
+    // 设置目标位置
     pcm.target_point_offset.x = target_position.x;
     pcm.target_point_offset.y = target_position.y;
     pcm.target_point_offset.z = target_position.z;
 
+    // 定义一个立方体作为位置约束的边界
     shape_msgs::msg::SolidPrimitive bounding_volume;
     bounding_volume.type = shape_msgs::msg::SolidPrimitive::BOX;
     bounding_volume.dimensions.resize(3);
-    bounding_volume.dimensions[0] = scope_size.x;
-    bounding_volume.dimensions[1] = scope_size.y;
-    bounding_volume.dimensions[2] = scope_size.z;
+    bounding_volume.dimensions = { scope_size.x, scope_size.y, scope_size.z };
     pcm.constraint_region.primitives.push_back(bounding_volume);
     pcm.constraint_region.primitive_poses.push_back(geometry_msgs::msg::Pose());
     pcm.weight = weight;
 
+    // 将位置约束添加到约束列表中
     _constraints_.position_constraints.push_back(pcm);
-    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器位置约束");
+    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器位置约束，目标位置：(%f, %f, %f)，范围大小：(%f, %f, %f)，权重：%f",
+        target_position.x, target_position.y, target_position.z,
+        scope_size.x, scope_size.y, scope_size.z, weight);
 }
 
 /**
@@ -572,16 +738,17 @@ void EndEffectorCmd::set_position_constraint(const geometry_msgs::msg::Point& ta
  * @param lower 关节角度的下容忍度（单位：弧度，默认值为 0.1）
  * @param weight 约束权重（默认值为 1.0，表示硬约束，值越小表示对约束的满足要求越低）
  */
-void EndEffectorCmd::set_joint_constraint(const std::string& joint_name, double target_angle, double upper, double lower, double weight) {
+void EndEffectorCmd::set_joint_constraint(const std::string& joint_name, double target_angle, double above, double below, double weight) {
     moveit_msgs::msg::JointConstraint jc;
     jc.joint_name = joint_name;
     jc.position = target_angle;
-    jc.tolerance_above = upper;
-    jc.tolerance_below = lower;
+    jc.tolerance_above = above;
+    jc.tolerance_below = below;
     jc.weight = weight;
 
     _constraints_.joint_constraints.push_back(jc);
-    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器关节约束");
+    RCLCPP_INFO(_node_->get_logger(), "已设置末端执行器关节约束，关节名称：%s，目标角度：%f，上容忍度：%f，下容忍度：%f，权重：%f",
+        joint_name.c_str(), target_angle, above, below, weight);
 }
 
 /**
@@ -596,9 +763,39 @@ void EndEffectorCmd::apply_constraints() {
  * @brief 清除所有姿态约束
  */
 void EndEffectorCmd::clear_constraints() {
-    _constraints_.orientation_constraints.clear();
-    _arm_.setPathConstraints(_constraints_);
+    _constraints_ = moveit_msgs::msg::Constraints();
+    _arm_.clearPathConstraints();
     RCLCPP_INFO(_node_->get_logger(), "已清除所有姿态约束");
+}
+
+/**
+ * @brief 判断当前是否有异步规划或执行正在进行
+ * @return 如果有异步规划或执行正在进行，则返回 true；否则返回 false
+ */
+bool EndEffectorCmd::is_planning_or_executing() const {
+    return _is_planning_or_executing_;
+}
+
+/**
+ * @brief 取消当前的异步规划或执行
+ * @return 是否成功取消
+ */
+ErrorCode EndEffectorCmd::cancel_async() {
+    if(!_is_planning_or_executing_) {
+        RCLCPP_INFO(_node_->get_logger(), "当前没有正在进行的异步任务");
+        return ErrorCode::SUCCESS;
+    }
+
+    RCLCPP_INFO(_node_->get_logger(), "正在取消异步任务...");
+    _arm_.stop();
+
+    if(_async_thread_.joinable()) {
+        _async_thread_.join();
+    }
+
+    _is_planning_or_executing_ = false;
+    RCLCPP_INFO(_node_->get_logger(), "异步任务已取消");
+    return ErrorCode::SUCCESS;
 }
 
 /**
@@ -638,6 +835,7 @@ geometry_msgs::msg::Pose EndEffectorCmd::rpy_to_pose(double roll, double pitch, 
     pose.position.y = y;
     pose.position.z = z;
     pose.orientation = rpy_to_quaternion(roll, pitch, yaw);
+
     return pose;
 }
 
@@ -682,7 +880,7 @@ int main(int argc, char** argv) {
     dm_arm::EndEffectorCmd eef_cmd(node, "arm");
     eef_cmd.home();
 
-    // ===== 测试 1: 用 TOTG 规划直线 =====
+    // ===== 测试 1: 用 TOTG 异步规划直线 =====
     RCLCPP_INFO(node->get_logger(), "测试 1: 用 TOTG 规划直线");
     geometry_msgs::msg::Pose start_pose = eef_cmd.get_current_pose();
     RCLCPP_INFO(node->get_logger(), "当前末端执行器位姿：位置(%.3f, %.3f, %.3f)，姿态(%.3f, %.3f, %.3f, %.3f)",
@@ -692,28 +890,42 @@ int main(int argc, char** argv) {
     end_pose.position.x -= 0.2;
     end_pose.position.z += 0.1;
     auto result = eef_cmd.set_line(start_pose, end_pose);
-    // if(result.success) {
-    //     RCLCPP_INFO(node->get_logger(), "规划成功，开始执行轨迹");
-    //     eef_cmd.execute(result.trajectory);
-    // }
-    // else {
-    //     RCLCPP_ERROR(node->get_logger(), "规划失败，错误信息：%s", result.message.c_str());
-    // }
+    if(result.error_code == dm_arm::ErrorCode::SUCCESS) {
+        RCLCPP_INFO(node->get_logger(), "规划成功，开始执行轨迹");
+        eef_cmd.async_execute(result.trajectory);
+        while(eef_cmd.is_planning_or_executing()) {
+            rclcpp::sleep_for(std::chrono::milliseconds(2000));
+            RCLCPP_INFO(node->get_logger(), "正在执行轨迹...");
+        }
+    }
+    else {
+        RCLCPP_WARN(node->get_logger(), "规划失败，错误信息：%s", result.message.c_str());
+    }
 
-    // ===== 测试 2: 用 ISP 规划曲线 =====
-    RCLCPP_INFO(node->get_logger(), "测试 2: 用 ISP 规划曲线");
+    // ===== 测试 2: 用 TOTG 异步规划曲线 =====
+    eef_cmd.home();
+    RCLCPP_INFO(node->get_logger(), "测试 2: 用 TOTG 规划曲线");
     geometry_msgs::msg::Pose via_pose = start_pose;
     start_pose.position.x += 0.2;
     start_pose.position.z += 0.1;
     via_pose.position.y += 0.4;
     via_pose.position.z += 0.1;
-    result = eef_cmd.set_bezier_curve(start_pose, via_pose, end_pose, 30, 0.01, 0.0, dm_arm::TimeParamMethod::ISP, 0.1, 0.4);
-    if(result.success) {
+    result = eef_cmd.set_bezier_curve(start_pose, via_pose, end_pose, 30, 0.01, 0.0, dm_arm::TimeParamMethod::TOTG, 0.1, 0.1);
+    if(result.error_code == dm_arm::ErrorCode::SUCCESS) {
         RCLCPP_INFO(node->get_logger(), "曲线规划成功，开始执行轨迹");
-        eef_cmd.execute(result.trajectory);
+        eef_cmd.async_execute(result.trajectory);
+
+        // ===== 测试 3: 异步规划执行期间打印状态 =====
+        RCLCPP_INFO(node->get_logger(), "测试 3: 异步规划执行期间打印状态");
+        while(eef_cmd.is_planning_or_executing()) {
+            RCLCPP_INFO(node->get_logger(), "当前末端执行器位姿：位置(%.3f, %.3f, %.3f)，姿态(%.3f, %.3f, %.3f, %.3f)",
+                eef_cmd.get_current_pose().position.x, eef_cmd.get_current_pose().position.y, eef_cmd.get_current_pose().position.z,
+                eef_cmd.get_current_pose().orientation.x, eef_cmd.get_current_pose().orientation.y, eef_cmd.get_current_pose().orientation.z, eef_cmd.get_current_pose().orientation.w);
+            rclcpp::sleep_for(std::chrono::milliseconds(500));
+        }
     }
     else {
-        RCLCPP_ERROR(node->get_logger(), "曲线规划失败，错误信息：%s", result.message.c_str());
+        RCLCPP_WARN(node->get_logger(), "曲线规划失败，错误信息：%s", result.message.c_str());
     }
 
     // ===== 测试完成 =====

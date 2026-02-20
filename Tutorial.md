@@ -806,3 +806,173 @@ plan.trajectory_ = trajectory; // 赋值参数化后的轨迹
 moveit::core::MoveItErrorCode err_code = arm.execute(plan);
 ```
 
+# 6. 空间约束与异步进程
+
+## 6.1. 空间约束 (Path Constraints)
+
+​	MoveIt2 允许在运动规划时对末端执行器或关节施加约束，确保在整个运动过程中满足特定的几何或姿态要求；常见的约束包括：姿态约束（Orientation Constraint）、位置约束（Position Constraint）和关节约束（Joint Constraint）
+
+### 6.1.1. 姿态约束
+
+​	姿态约束用于限制末端执行器在运动过程中的姿态变化范围
+
+```cpp
+moveit_msgs::msg::OrientationConstraint ocm;
+ocm.link_name = "link_tcp";
+ocm.header.frame_id = "base_link";
+ocm.header.stamp = node->now();
+
+// 设置目标姿态
+ocm.orientation = target_orientation;
+// 设置各轴的容忍度（弧度）
+ocm.absolute_x_axis_tolerance = 0.1;
+ocm.absolute_y_axis_tolerance = 0.1;
+ocm.absolute_z_axis_tolerance = 0.3;
+ocm.weight = 1.0; // 权重，1.0 表示硬约束
+
+moveit_msgs::msg::Constraints constraints;
+constraints.orientation_constraints.push_back(ocm);
+arm.setPathConstraints(constraints);
+```
+
+### 6.1.2. 位置约束
+
+​	位置约束用于限制末端执行器在运动过程中必须保持在某个特定的空间区域内
+
+```cpp
+moveit_msgs::msg::PositionConstraint pcm;
+pcm.link_name = "link_tcp";
+pcm.header.frame_id = "base_link";
+pcm.header.stamp = node->now();
+
+// 设置目标位置偏移
+pcm.target_point_offset.x = target_position.x;
+pcm.target_point_offset.y = target_position.y;
+pcm.target_point_offset.z = target_position.z;
+
+// 定义约束区域
+shape_msgs::msg::SolidPrimitive bounding_volume;
+bounding_volume.type = shape_msgs::msg::SolidPrimitive::BOX;
+bounding_volume.dimensions = { scope_size.x, scope_size.y, scope_size.z };
+pcm.constraint_region.primitives.push_back(bounding_volume);
+pcm.constraint_region.primitive_poses.push_back(geometry_msgs::msg::Pose());
+pcm.weight = 1.0;
+
+moveit_msgs::msg::Constraints constraints;
+constraints.position_constraints.push_back(pcm);
+arm.setPathConstraints(constraints);
+```
+
+### 6.1.3. 关节约束
+
+关节约束用于限制某个特定关节在运动过程中的角度范围
+
+```cpp
+moveit_msgs::msg::JointConstraint jc;
+jc.joint_name = "joint1";
+jc.position = target_angle;
+jc.tolerance_above = 0.1; // 上容忍度
+jc.tolerance_below = 0.1; // 下容忍度
+jc.weight = 1.0;
+
+moveit_msgs::msg::Constraints constraints;
+constraints.joint_constraints.push_back(jc);
+arm.setPathConstraints(constraints);
+```
+
+### 6.1.4. 清除约束
+
+在完成受限运动后，务必清除约束，否则会影响后续的自由规划：
+
+```cpp
+arm.clearPathConstraints();
+```
+
+## 6.2. 异步进程与线程安全
+
+​	在实际的机器人控制中，规划和执行（`plan` 和 `execute`）通常是耗时操作；如果直接在主线程中调用，会阻塞 ROS 2 节点的事件循环（Spin），导致无法接收新的话题消息或服务请求；因此，通常需要将规划和执行放入异步线程中
+
+### 6.2.1. 异步执行的实现
+
+​	使用 `std::thread` 将耗时操作放入后台执行，并通过回调函数（Callback）通知主线程执行结果
+
+```cpp
+#include <thread>
+#include <atomic>
+
+// 成员变量
+std::atomic<bool> is_planning_or_executing_{false};
+std::thread async_thread_;
+
+// 异步执行函数
+void async_execute(const moveit_msgs::msg::RobotTrajectory& trajectory, std::function<void(bool)> callback) {
+    // 检查是否已有任务在运行
+    if (is_planning_or_executing_) {
+        RCLCPP_WARN(node->get_logger(), "当前已有异步任务正在执行，请稍后再试");
+        if(callback) callback(false);
+        return;
+    }
+
+    // 回收上一个已完成的线程资源
+    if (async_thread_.joinable()) {
+        async_thread_.join();
+    }
+
+    is_planning_or_executing_ = true;
+
+    // 启动新线程
+    async_thread_ = std::thread([this, trajectory, callback]() {
+        moveit::planning_interface::MoveGroupInterface::Plan plan;
+        plan.trajectory_ = trajectory;
+
+        moveit::core::MoveItErrorCode err_code = arm.execute(plan);
+        
+        is_planning_or_executing_ = false;
+        
+        if(err_code == moveit::core::MoveItErrorCode::SUCCESS) {
+            if(callback) callback(true);
+        } else {
+            if(callback) callback(false);
+        }
+    });
+}
+```
+
+### 6.2.2. 线程安全与状态保护
+
+​	MoveIt 的 `MoveGroupInterface` 并不是完全线程安全的；如果在后台线程正在执行轨迹时，主线程去修改目标位姿（如调用 `setPoseTarget`）或发起新的规划，会导致内部状态冲突甚至程序崩溃
+
+**解决方案：**在所有会修改目标、进行规划或执行的函数入口处，检查原子变量状态，拦截非法调用：
+
+```cpp
+bool set_target(const geometry_msgs::msg::Pose& target) {
+    if (is_planning_or_executing_) {
+        RCLCPP_WARN(node->get_logger(), "当前已有异步任务正在执行，无法设置新目标");
+        return false;
+    }
+    return arm.setPoseTarget(target);
+}
+```
+
+### 6.2.3. 安全退出与取消任务
+
+​	在类析构或需要打断当前运动时，必须安全地停止 MoveIt 运动并等待线程结束：
+
+```cpp
+// 取消异步任务
+void cancel_async() {
+    if (!is_planning_or_executing_) return;
+    
+    arm.stop(); // 停止 MoveIt 当前运动
+    
+    if (async_thread_.joinable()) {
+        async_thread_.join(); // 等待线程完全退出
+    }
+    is_planning_or_executing_ = false;
+}
+
+// 析构函数
+~EndEffectorCmd() {
+    cancel_async();
+}
+```
