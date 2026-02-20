@@ -71,6 +71,10 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/dm_arm_controller/config" TYPE DIRECTORY FILES "/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/src/dm_arm_controller/config/" FILES_MATCHING REGEX "/[^/]*\\.yaml$" REGEX "/[^/]*\\.yml$" REGEX "/[^/]*\\.json$" REGEX "/[^/]*\\.xml$")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ament_index/resource_index/package_run_dependencies" TYPE FILE FILES "/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/dm_arm_controller")
 endif()
 

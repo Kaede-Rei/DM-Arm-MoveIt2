@@ -612,13 +612,13 @@ int main(int argc, char** argv) {
     // }
 
     // ===== 测试 2: 用 SPLINE 规划圆弧 =====
-    RCLCPP_INFO(node->get_logger(), "测试 2: 用 TOTG 规划圆弧");
+    RCLCPP_INFO(node->get_logger(), "测试 2: 用 SPLINE 规划圆弧");
     geometry_msgs::msg::Pose via_pose = start_pose;
     start_pose.position.x += 0.2;
     start_pose.position.z += 0.1;
     via_pose.position.y += 0.4;
     via_pose.position.z += 0.1;
-    result = eef_cmd.set_circle(start_pose, via_pose, end_pose, 30, 0.01, 0.0, dm_arm::TimeParamMethod::TOTG, 0.05, 0.05);
+    result = eef_cmd.set_circle(start_pose, via_pose, end_pose, 30, 0.01, 0.0, dm_arm::TimeParamMethod::SPLINE, 0.1, 0.4);
     if(result.success) {
         RCLCPP_INFO(node->get_logger(), "圆弧规划成功，开始执行轨迹");
         eef_cmd.execute(result.trajectory);
