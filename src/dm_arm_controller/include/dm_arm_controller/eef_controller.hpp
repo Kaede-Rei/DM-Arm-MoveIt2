@@ -16,6 +16,7 @@ namespace dm_arm {
  */
 class JointEefInterface {
 public:
+    JointEefInterface() = default;
     virtual ~JointEefInterface() = default;
 
     // 禁止拷贝构造和拷贝赋值
@@ -84,6 +85,17 @@ public:
      * @return 规划和执行结果的错误码，成功返回ErrorCode::SUCCESS，失败返回相应的错误码
      */
     virtual ErrorCode plan_and_execute() = 0;
+
+    /**
+     * @brief 获取末端执行器当前的关节值，返回一个包含所有关节当前值的向量，顺序与规划组中定义的关节顺序一致
+     * @return 包含末端执行器当前关节值的向量，单位和范围由子类实现
+     */
+    virtual std::vector<double> get_current_joints() const = 0;
+    /**
+     * @brief 获取末端执行器当前的链接名称列表，返回一个包含所有当前链接名称的向量
+     * @return 包含末端执行器当前链接名称的向量，每个元素是一个链接名称字符串，具体的链接名称由子类实现
+     */
+    virtual std::vector<std::string> get_current_link_names() const = 0;
 };
 
 /**
@@ -91,6 +103,7 @@ public:
  */
 class IoEefInterface {
 public:
+    IoEefInterface() = default;
     virtual ~IoEefInterface() = default;
 
     // 禁止拷贝构造和拷贝赋值
@@ -133,6 +146,7 @@ public:
 
 class PwmEefInterface {
 public:
+    PwmEefInterface() = default;
     virtual ~PwmEefInterface() = default;
 
     // 禁止拷贝构造和拷贝赋值
@@ -180,6 +194,7 @@ public:
  */
 class ForceFeedbackEefInterface {
 public:
+    ForceFeedbackEefInterface() = default;
     virtual ~ForceFeedbackEefInterface() = default;
 
     // 禁止拷贝构造和拷贝赋值
@@ -213,7 +228,7 @@ public:
      * @param node ROS2节点的共享指针，用于创建发布者、订阅者和服务等ROS2通信机制
      * @param eef_name 末端执行器的名称，用于区分不同的末端执行器，便于日志记录和调试
      */
-    explicit EndEffector(rclcpp::Node::SharedPtr node, const std::string& eef_name) : _node_(std::move(node)), _eef_name_(eef_name) { };
+    explicit EndEffector(rclcpp::Node::SharedPtr node, const std::string& eef_name) : _node_(std::move(node)), _eef_name_(eef_name) {};
     virtual ~EndEffector() = default;
 
     // 禁止拷贝构造和拷贝赋值
@@ -230,19 +245,9 @@ public:
     virtual const std::string& get_eef_name() const { return _eef_name_; }
 
     /**
-     * @brief 初始化末端执行器控制器，设置必要的参数和状态
-     * @return 初始化结果的错误码，成功返回ErrorCode::SUCCESS，失败返回相应的错误码
-     */
-    virtual ErrorCode init() = 0;
-    /**
      * @brief 停止末端执行器动作
      */
     virtual void stop() = 0;
-    /**
-     * @brief 检查末端执行器是否准备就绪，可以执行动作
-     * @return 如果末端执行器准备就绪返回true，否则返回false
-     */
-    virtual bool is_ready() const = 0;
 
     /**
      * @brief 获取末端执行器支持的功能类型，子类可以重写这些方法来指示支持的功能
@@ -282,6 +287,45 @@ private:
     rclcpp::Node::SharedPtr _node_;
     std::string _eef_name_;
     geometry_msgs::msg::Pose _tcp_offset_;
+};
+
+/**
+ * @brief TwoFingerGripper 类：二指夹爪具体实现类
+ * @note 该类继承自 EndEffector 类，并实现了 JointEefInterface 和 ForceFeedbackEefInterface 接口
+ * @note 提供了二指夹爪的具体控制功能，包括关节控制和力反馈功能
+ */
+class TwoFingerGripper : public EndEffector,
+    public JointEefInterface,
+    public ForceFeedbackEefInterface {
+public:
+    explicit TwoFingerGripper(rclcpp::Node::SharedPtr node,
+        const std::string& eef_name);
+    ~TwoFingerGripper() override = default;
+
+    void stop() override;
+
+    const std::string& get_group_name() const override;
+    moveit::planning_interface::MoveGroupInterface& get_move_group() override;
+    ErrorCode open() override;
+    ErrorCode close() override;
+    ErrorCode execute_preset_pose(const std::string& pose_name) override;
+    ErrorCode set_joint_value(const std::string& joint_name, double value) override;
+    ErrorCode set_joint_values(const std::vector<double>& joint_values) override;
+    ErrorCode plan(moveit::planning_interface::MoveGroupInterface::Plan& plan) override;
+    ErrorCode execute(const moveit::planning_interface::MoveGroupInterface::Plan& plan) override;
+    ErrorCode plan_and_execute() override;
+
+    std::vector<double> get_current_joints() const override;
+    std::vector<std::string> get_current_link_names() const override;
+
+    bool supports_joint_control() const override { return true; }
+    bool supports_force_feedback() const override { return true; }
+
+    std::vector<std::string> get_force_names() const override;
+    ErrorCode get_force(const std::string& force_name, double& force_value) const override;
+
+private:
+    moveit::planning_interface::MoveGroupInterface _gripper_;
 };
 
 // ! ========================= 接 口 函 数 声 明 ========================= ! //

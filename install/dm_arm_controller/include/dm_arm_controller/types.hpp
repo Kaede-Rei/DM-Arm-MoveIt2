@@ -11,9 +11,9 @@ namespace dm_arm {
  * @param ASYNC_TASK_RUNNING 表示当前已有异步任务正在执行，无法执行新任务
  * @param INVALID_TARGET_TYPE 表示提供的目标类型无效，无法识别或处理
  * @param TF_TRANSFORM_FAILED 表示坐标变换失败，可能是由于TF树中缺少必要的变换或变换数据不正确导致
- * @param PLANNING_FAILED 表示规划失败，可能是由于环境约束、目标不可达或其他规划问题导致的
- * @param EXECUTION_FAILED 表示执行失败，可能是由于机器人状态不允许执行、执行过程中发生错误或其他执行问题导致的
- * @param TIME_PARAM_FAILED 表示时间参数化失败，可能是由于轨迹不可行、参数化算法失败或其他时间参数化问题导致的
+ * @param PLANNING_FAILED 表示规划失败，可能是由于环境约束、目标不可达或其他规划问题导致
+ * @param EXECUTION_FAILED 表示执行失败，可能是由于机器人状态不允许执行、执行过程中发生错误或其他执行问题导致
+ * @param TIME_PARAM_FAILED 表示时间参数化失败，可能是由于轨迹不可行、参数化算法失败或其他时间参数化问题导致
  * @param EMPTY_WAYPOINTS 表示提供的路径点列表为空，无法进行规划
  * @param DESCARTES_PLANNING_FAILED 表示笛卡尔空间规划失败，可能是由于路径点不可达、规划算法失败或其他笛卡尔规划问题导致
  * @param TARGET_OUT_OF_BOUNDS 表示目标超出机器人工作空间或关节限制，无法执行

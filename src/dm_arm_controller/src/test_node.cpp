@@ -18,8 +18,8 @@ static void shutdown_thread(std::thread& spin_thread);
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
 
-    auto node = rclcpp::Node::make_shared("end_effector_cmd");
-    RCLCPP_INFO(node->get_logger(), "节点：end_effector_cmd 已启动");
+    auto node = rclcpp::Node::make_shared("test_node");
+    RCLCPP_INFO(node->get_logger(), "节点：test_node 已启动");
 
     // 需要让开线程让节点 spin 来实时更新状态
     rclcpp::executors::SingleThreadedExecutor executor;
@@ -76,6 +76,16 @@ int main(int argc, char** argv) {
     }
     else {
         RCLCPP_WARN(node->get_logger(), "曲线规划失败，错误信息：%s", result.message.c_str());
+    }
+
+    // ===== 测试 4：打印末端执行器关节及其关节角 ===== //
+    RCLCPP_INFO(node->get_logger(), "测试 4: 打印末端执行器关节及其关节角");
+    dm_arm::TwoFingerGripper gripper(node, "gripper");
+    auto joints = gripper.get_current_joints();
+    auto link_names = gripper.get_current_link_names();
+    RCLCPP_INFO(node->get_logger(), "末端执行器 [%s] 当前关节值：", gripper.get_eef_name().c_str());
+    for(size_t i = 0; i < joints.size(); ++i) {
+        RCLCPP_INFO(node->get_logger(), "  关节 [%s]: %.3f", link_names[i].c_str(), joints[i]);
     }
 
     // ===== 测试完成 =====

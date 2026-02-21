@@ -79,25 +79,41 @@ public:
     geometry_msgs::msg::Pose get_current_pose() const;
 
 private:
+    /// @brief 节点指针
     rclcpp::Node::SharedPtr _node_;
+    /// @brief MoveGroupInterface 对象
     moveit::planning_interface::MoveGroupInterface _arm_;
+    /// @brief 末端执行器对象的共享指针
     std::shared_ptr<EndEffector> _eef_;
 
+    /// @brief TF2 缓冲区
     std::unique_ptr<tf2_ros::Buffer> _tf_buffer_;
+    /// @brief TF2 监听器
     std::unique_ptr<tf2_ros::TransformListener> _tf_listener_;
 
+    /// @brief 机械臂底座坐标系名称
     const std::string _base_link_;
+    /// @brief 机械臂末端执行器坐标系名称
     const std::string _eef_link_;
 
+    /// @brief 速度缩放因子
     double _vel_scale_;
+    /// @brief 加速度缩放因子
     double _acc_scale_;
+
+    /// @brief 末端执行器线性插补步长
     double _eef_step_;
+    /// @brief 跳跃阈值（用于 Descartes 规划）
     double _jump_threshold_;
+    /// @brief 最小成功率（用于 Descartes 规划结果评估）
     double _min_success_rate_;
 
+    /// @brief 运动约束
     moveit_msgs::msg::Constraints _constraints_;
 
+    /// @brief 异步规划执行布尔值
     std::atomic<bool> _is_planning_or_executing_{ false };
+    /// @brief 异步规划执行实例
     std::thread _async_thread_;
 };
 
