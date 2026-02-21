@@ -1,5 +1,8 @@
-/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/dm_arm_controller/end_effector_cmd
-/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller/end_effector_cmd.hpp
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/dm_arm_controller/arm_controller
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/dm_arm_controller/eef_controller
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller/types.hpp
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller/eef_controller.hpp
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller/arm_controller.hpp
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/launch/run.launch.py
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/config/params.yaml
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/ament_index/resource_index/package_run_dependencies/dm_arm_controller

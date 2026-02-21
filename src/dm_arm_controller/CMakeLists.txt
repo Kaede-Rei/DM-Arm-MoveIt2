@@ -27,7 +27,6 @@ set(DEPENDENCIES
     # dependencies_name
     rclcpp
     moveit_ros_planning_interface
-    tf2_geometry_msgs
 )
 
 # 必需依赖
@@ -55,41 +54,44 @@ set(ACTION_FILES
 
 )
 
-# 如定义了自定义消息/服务/动作，取消注释
-# rosidl_generate_interfaces(${PROJECT_NAME}
-#     ${MSG_FILES}
-#     ${SRV_FILES}
-#     ${ACTION_FILES}
-#     DEPENDENCIES ${DEPENDENCIES}
-# )
-#
-# # 导出接口类型支持(用于在同一包内使用自定义接口)
-# rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+# 如果没有接口文件，跳过接口生成
+if(MSG_FILES OR SRV_FILES OR ACTION_FILES)
+    rosidl_generate_interfaces(${PROJECT_NAME}
+        ${MSG_FILES}
+        ${SRV_FILES}
+        ${ACTION_FILES}
+        DEPENDENCIES ${DEPENDENCIES}
+    )
+    rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+endif()
 
 # ========================= 共享库配置(可选) ========================= #
 
-# # TODO: 定义库名称和源文件
+# TODO: 定义库名称和源文件
 set(LIB_NAME ${PROJECT_NAME}_lib)
 set(LIB_SOURCES
     # src/library.cpp
 
 )
 
-# 如需创建共享库，取消注释
-# add_library(${LIB_NAME} SHARED ${LIB_SOURCES})
-# target_include_directories(${LIB_NAME}
-#     PUBLIC
-#         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#         $<INSTALL_INTERFACE:include>
-# )
-# ament_target_dependencies(${LIB_NAME} ${DEPENDENCIES})
+# 如果没有库文件，则跳过库的创建
+if(LIB_SOURCES)
+    add_library(${LIB_NAME} SHARED ${LIB_SOURCES})
+    target_include_directories(${LIB_NAME}
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    ament_target_dependencies(${LIB_NAME} ${DEPENDENCIES})
+endif()
 
 # ========================= 节点配置(按需修改) ========================= #
 
 # TODO: 在此列表中添加所有节点名称(不带.cpp后缀)
 set(NODES
     # node_name
-    end_effector_cmd
+    arm_controller
+    eef_controller
 )
 
 # 统一编译节点
@@ -108,11 +110,15 @@ foreach(node IN LISTS NODES)
     
     ament_target_dependencies(${node} ${DEPENDENCIES})
     
-    # 如有共享库，取消下面的注释
-    # target_link_libraries(${node} ${LIB_NAME})
+    # 如果有共享库，链接库
+    if(LIB_SOURCES)
+        target_link_libraries(${node} ${LIB_NAME})
+    endif()
 
-    # 如果使用自定义接口，取消注释
-    # target_link_libraries(node "${cpp_typesupport_target}")
+    # 如果有自定义接口，链接类型支持库
+    if(MSG_FILES OR SRV_FILES OR ACTION_FILES)
+        target_link_libraries(${node} "${cpp_typesupport_target}")
+    endif()
 endforeach()
 
 # ========================= 安装配置 ========================= #
@@ -149,22 +155,27 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config)
     )
 endif()
 
-# 如需启用共享库，取消注释
-# install(TARGETS ${LIB_NAME}
-#     EXPORT export_${PROJECT_NAME}
-#     ARCHIVE DESTINATION lib
-#     LIBRARY DESTINATION lib
-#     RUNTIME DESTINATION bin
-# )
-# ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+# 如果有共享库，安装库文件并导出库目标
+if(LIB_SOURCES)
+    install(TARGETS ${LIB_NAME}
+        EXPORT export_${PROJECT_NAME}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+    )
+    ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+endif()
 
 # ========================= 导出配置 ========================= #
 
 ament_export_dependencies(${DEPENDENCIES})
 ament_export_include_directories(include)
 
-# 如需导出自定义接口依赖，取消注释
-# ament_export_dependencies(rosidl_default_runtime)
+# 如果定义了自定义接口，导出接口类型支持
+if(MSG_FILES OR SRV_FILES OR ACTION_FILES)
+    ament_export_targets(${cpp_typesupport_target})
+    ament_export_dependencies(rosidl_default_runtime)
+endif()
 
 # ========================= 测试配置(可选) ========================= #
 

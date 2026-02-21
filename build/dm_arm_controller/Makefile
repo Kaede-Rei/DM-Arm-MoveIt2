@@ -198,41 +198,78 @@ dm_arm_controller_uninstall/fast:
 .PHONY : dm_arm_controller_uninstall/fast
 
 #=============================================================================
-# Target rules for targets named end_effector_cmd
+# Target rules for targets named arm_controller
 
 # Build rule for target.
-end_effector_cmd: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 end_effector_cmd
-.PHONY : end_effector_cmd
+arm_controller: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 arm_controller
+.PHONY : arm_controller
 
 # fast build rule for target.
-end_effector_cmd/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/end_effector_cmd.dir/build.make CMakeFiles/end_effector_cmd.dir/build
-.PHONY : end_effector_cmd/fast
+arm_controller/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/build
+.PHONY : arm_controller/fast
 
-src/end_effector_cmd.o: src/end_effector_cmd.cpp.o
-.PHONY : src/end_effector_cmd.o
+#=============================================================================
+# Target rules for targets named eef_controller
+
+# Build rule for target.
+eef_controller: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 eef_controller
+.PHONY : eef_controller
+
+# fast build rule for target.
+eef_controller/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/build
+.PHONY : eef_controller/fast
+
+src/arm_controller.o: src/arm_controller.cpp.o
+.PHONY : src/arm_controller.o
 
 # target to build an object file
-src/end_effector_cmd.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/end_effector_cmd.dir/build.make CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.o
-.PHONY : src/end_effector_cmd.cpp.o
+src/arm_controller.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/src/arm_controller.cpp.o
+.PHONY : src/arm_controller.cpp.o
 
-src/end_effector_cmd.i: src/end_effector_cmd.cpp.i
-.PHONY : src/end_effector_cmd.i
+src/arm_controller.i: src/arm_controller.cpp.i
+.PHONY : src/arm_controller.i
 
 # target to preprocess a source file
-src/end_effector_cmd.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/end_effector_cmd.dir/build.make CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.i
-.PHONY : src/end_effector_cmd.cpp.i
+src/arm_controller.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/src/arm_controller.cpp.i
+.PHONY : src/arm_controller.cpp.i
 
-src/end_effector_cmd.s: src/end_effector_cmd.cpp.s
-.PHONY : src/end_effector_cmd.s
+src/arm_controller.s: src/arm_controller.cpp.s
+.PHONY : src/arm_controller.s
 
 # target to generate assembly for a file
-src/end_effector_cmd.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/end_effector_cmd.dir/build.make CMakeFiles/end_effector_cmd.dir/src/end_effector_cmd.cpp.s
-.PHONY : src/end_effector_cmd.cpp.s
+src/arm_controller.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/src/arm_controller.cpp.s
+.PHONY : src/arm_controller.cpp.s
+
+src/eef_controller.o: src/eef_controller.cpp.o
+.PHONY : src/eef_controller.o
+
+# target to build an object file
+src/eef_controller.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/src/eef_controller.cpp.o
+.PHONY : src/eef_controller.cpp.o
+
+src/eef_controller.i: src/eef_controller.cpp.i
+.PHONY : src/eef_controller.i
+
+# target to preprocess a source file
+src/eef_controller.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/src/eef_controller.cpp.i
+.PHONY : src/eef_controller.cpp.i
+
+src/eef_controller.s: src/eef_controller.cpp.s
+.PHONY : src/eef_controller.s
+
+# target to generate assembly for a file
+src/eef_controller.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/src/eef_controller.cpp.s
+.PHONY : src/eef_controller.cpp.s
 
 # Help Target
 help:
@@ -249,10 +286,14 @@ help:
 	@echo "... test"
 	@echo "... dm_arm_controller_uninstall"
 	@echo "... uninstall"
-	@echo "... end_effector_cmd"
-	@echo "... src/end_effector_cmd.o"
-	@echo "... src/end_effector_cmd.i"
-	@echo "... src/end_effector_cmd.s"
+	@echo "... arm_controller"
+	@echo "... eef_controller"
+	@echo "... src/arm_controller.o"
+	@echo "... src/arm_controller.i"
+	@echo "... src/arm_controller.s"
+	@echo "... src/eef_controller.o"
+	@echo "... src/eef_controller.i"
+	@echo "... src/eef_controller.s"
 .PHONY : help
 
 
