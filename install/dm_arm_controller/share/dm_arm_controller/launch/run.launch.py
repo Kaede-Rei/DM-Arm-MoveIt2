@@ -19,7 +19,7 @@ def generate_launch_description():
     # 创建节点并传入 moveit_config.to_dict()
     node = Node(
         package="dm_arm_controller",
-        executable="end_effector_cmd",
+        executable="test_node",
         output="screen",
         parameters=[
             moveit_config.to_dict(),

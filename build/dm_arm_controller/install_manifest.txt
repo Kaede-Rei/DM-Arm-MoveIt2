@@ -1,10 +1,12 @@
-/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/dm_arm_controller/arm_controller
-/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/dm_arm_controller/eef_controller
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/dm_arm_controller/test_node
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller/types.hpp
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller/eef_controller.hpp
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/include/dm_arm_controller/arm_controller.hpp
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/launch/run.launch.py
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/config/params.yaml
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/lib/libdm_arm_controller_lib.so
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/environment/library_path.sh
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/environment/library_path.dsv
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/ament_index/resource_index/package_run_dependencies/dm_arm_controller
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/ament_index/resource_index/parent_prefix_path/dm_arm_controller
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/environment/ament_prefix_path.sh
@@ -17,6 +19,9 @@
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/local_setup.dsv
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/package.dsv
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/ament_index/resource_index/packages/dm_arm_controller
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/export_dm_arm_controllerExport.cmake
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/export_dm_arm_controllerExport-noconfig.cmake
+/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/ament_cmake_export_targets-extras.cmake
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/ament_cmake_export_dependencies-extras.cmake
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/ament_cmake_export_include_directories-extras.cmake
 /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/install/dm_arm_controller/share/dm_arm_controller/cmake/dm_arm_controllerConfig.cmake

@@ -71,7 +71,8 @@ endif()
 set(LIB_NAME ${PROJECT_NAME}_lib)
 set(LIB_SOURCES
     # src/library.cpp
-
+    src/arm_controller.cpp
+    src/eef_controller.cpp
 )
 
 # 如果没有库文件，则跳过库的创建
@@ -90,8 +91,7 @@ endif()
 # TODO: 在此列表中添加所有节点名称(不带.cpp后缀)
 set(NODES
     # node_name
-    arm_controller
-    eef_controller
+    test_node
 )
 
 # 统一编译节点

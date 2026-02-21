@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "arm_controller"
+			"path" : "libdm_arm_controller_lib.so"
 		}
 	],
 	"backtrace" : 1,
@@ -10,7 +10,7 @@
 	{
 		"commands" : 
 		[
-			"add_executable",
+			"add_library",
 			"install",
 			"target_link_libraries",
 			"ament_target_dependencies",
@@ -30,19 +30,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 103,
+				"line" : 80,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 127,
+				"line" : 160,
 				"parent" : 0
 			},
 			{
 				"command" : 3,
 				"file" : 0,
-				"line" : 111,
+				"line" : 86,
 				"parent" : 0
 			},
 			{
@@ -60,7 +60,7 @@
 			{
 				"command" : 5,
 				"file" : 0,
-				"line" : 105,
+				"line" : 81,
 				"parent" : 0
 			},
 			{
@@ -76,6 +76,9 @@
 		{
 			"compileCommandFragments" : 
 			[
+				{
+					"fragment" : "-fPIC"
+				},
 				{
 					"backtrace" : 5,
 					"fragment" : "-Wall"
@@ -157,6 +160,9 @@
 				{
 					"backtrace" : 4,
 					"define" : "RCUTILS_ENABLE_FAULT_INJECTION"
+				},
+				{
+					"define" : "dm_arm_controller_lib_EXPORTS"
 				}
 			],
 			"includes" : 
@@ -504,18 +510,23 @@
 			},
 			"sourceIndexes" : 
 			[
-				0
+				0,
+				1
 			]
 		}
 	],
-	"id" : "arm_controller::@6890427a1f51a3e7e1df",
+	"id" : "dm_arm_controller_lib::@6890427a1f51a3e7e1df",
 	"install" : 
 	{
 		"destinations" : 
 		[
 			{
 				"backtrace" : 2,
-				"path" : "lib/dm_arm_controller"
+				"path" : "lib"
+			},
+			{
+				"backtrace" : 2,
+				"path" : "lib"
 			}
 		],
 		"prefix" : 
@@ -1586,8 +1597,8 @@
 		],
 		"language" : "CXX"
 	},
-	"name" : "arm_controller",
-	"nameOnDisk" : "arm_controller",
+	"name" : "dm_arm_controller_lib",
+	"nameOnDisk" : "libdm_arm_controller_lib.so",
 	"paths" : 
 	{
 		"build" : ".",
@@ -1599,7 +1610,8 @@
 			"name" : "Source Files",
 			"sourceIndexes" : 
 			[
-				0
+				0,
+				1
 			]
 		}
 	],
@@ -1610,7 +1622,13 @@
 			"compileGroupIndex" : 0,
 			"path" : "src/arm_controller.cpp",
 			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/eef_controller.cpp",
+			"sourceGroupIndex" : 0
 		}
 	],
-	"type" : "EXECUTABLE"
+	"type" : "SHARED_LIBRARY"
 }

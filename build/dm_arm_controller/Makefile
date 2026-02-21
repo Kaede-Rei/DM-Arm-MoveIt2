@@ -198,37 +198,37 @@ dm_arm_controller_uninstall/fast:
 .PHONY : dm_arm_controller_uninstall/fast
 
 #=============================================================================
-# Target rules for targets named arm_controller
+# Target rules for targets named dm_arm_controller_lib
 
 # Build rule for target.
-arm_controller: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 arm_controller
-.PHONY : arm_controller
+dm_arm_controller_lib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 dm_arm_controller_lib
+.PHONY : dm_arm_controller_lib
 
 # fast build rule for target.
-arm_controller/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/build
-.PHONY : arm_controller/fast
+dm_arm_controller_lib/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/build
+.PHONY : dm_arm_controller_lib/fast
 
 #=============================================================================
-# Target rules for targets named eef_controller
+# Target rules for targets named test_node
 
 # Build rule for target.
-eef_controller: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 eef_controller
-.PHONY : eef_controller
+test_node: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_node
+.PHONY : test_node
 
 # fast build rule for target.
-eef_controller/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/build
-.PHONY : eef_controller/fast
+test_node/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_node.dir/build.make CMakeFiles/test_node.dir/build
+.PHONY : test_node/fast
 
 src/arm_controller.o: src/arm_controller.cpp.o
 .PHONY : src/arm_controller.o
 
 # target to build an object file
 src/arm_controller.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/src/arm_controller.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/src/arm_controller.cpp.o
 .PHONY : src/arm_controller.cpp.o
 
 src/arm_controller.i: src/arm_controller.cpp.i
@@ -236,7 +236,7 @@ src/arm_controller.i: src/arm_controller.cpp.i
 
 # target to preprocess a source file
 src/arm_controller.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/src/arm_controller.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/src/arm_controller.cpp.i
 .PHONY : src/arm_controller.cpp.i
 
 src/arm_controller.s: src/arm_controller.cpp.s
@@ -244,7 +244,7 @@ src/arm_controller.s: src/arm_controller.cpp.s
 
 # target to generate assembly for a file
 src/arm_controller.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/src/arm_controller.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/src/arm_controller.cpp.s
 .PHONY : src/arm_controller.cpp.s
 
 src/eef_controller.o: src/eef_controller.cpp.o
@@ -252,7 +252,7 @@ src/eef_controller.o: src/eef_controller.cpp.o
 
 # target to build an object file
 src/eef_controller.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/src/eef_controller.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/src/eef_controller.cpp.o
 .PHONY : src/eef_controller.cpp.o
 
 src/eef_controller.i: src/eef_controller.cpp.i
@@ -260,7 +260,7 @@ src/eef_controller.i: src/eef_controller.cpp.i
 
 # target to preprocess a source file
 src/eef_controller.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/src/eef_controller.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/src/eef_controller.cpp.i
 .PHONY : src/eef_controller.cpp.i
 
 src/eef_controller.s: src/eef_controller.cpp.s
@@ -268,8 +268,32 @@ src/eef_controller.s: src/eef_controller.cpp.s
 
 # target to generate assembly for a file
 src/eef_controller.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/src/eef_controller.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/src/eef_controller.cpp.s
 .PHONY : src/eef_controller.cpp.s
+
+src/test_node.o: src/test_node.cpp.o
+.PHONY : src/test_node.o
+
+# target to build an object file
+src/test_node.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_node.dir/build.make CMakeFiles/test_node.dir/src/test_node.cpp.o
+.PHONY : src/test_node.cpp.o
+
+src/test_node.i: src/test_node.cpp.i
+.PHONY : src/test_node.i
+
+# target to preprocess a source file
+src/test_node.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_node.dir/build.make CMakeFiles/test_node.dir/src/test_node.cpp.i
+.PHONY : src/test_node.cpp.i
+
+src/test_node.s: src/test_node.cpp.s
+.PHONY : src/test_node.s
+
+# target to generate assembly for a file
+src/test_node.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_node.dir/build.make CMakeFiles/test_node.dir/src/test_node.cpp.s
+.PHONY : src/test_node.cpp.s
 
 # Help Target
 help:
@@ -286,14 +310,17 @@ help:
 	@echo "... test"
 	@echo "... dm_arm_controller_uninstall"
 	@echo "... uninstall"
-	@echo "... arm_controller"
-	@echo "... eef_controller"
+	@echo "... dm_arm_controller_lib"
+	@echo "... test_node"
 	@echo "... src/arm_controller.o"
 	@echo "... src/arm_controller.i"
 	@echo "... src/arm_controller.s"
 	@echo "... src/eef_controller.o"
 	@echo "... src/eef_controller.i"
 	@echo "... src/eef_controller.s"
+	@echo "... src/test_node.o"
+	@echo "... src/test_node.i"
+	@echo "... src/test_node.s"
 .PHONY : help
 
 

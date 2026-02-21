@@ -6,7 +6,7 @@ namespace dm_arm {
 // ! ========================= 接 口 变 量 / Typedef 声 明 ========================= ! //
 
 /**
- * @brief ErrorCode 枚举类：用于表示末端执行器命令执行过程中可能出现的各种错误情况
+ * @brief ErrorCode 枚举类：用于表示机械臂和末端执行器命令执行过程中可能出现的各种错误情况
  * @param SUCCESS 表示操作成功完成
  * @param ASYNC_TASK_RUNNING 表示当前已有异步任务正在执行，无法执行新任务
  * @param INVALID_TARGET_TYPE 表示提供的目标类型无效，无法识别或处理

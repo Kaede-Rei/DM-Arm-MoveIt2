@@ -18,12 +18,6 @@ namespace dm_arm {
 
 }
 
-int main(int argc, char** argv) {
-    rclcpp::init(argc, argv);
-
-    return 0;
-}
-
 // ! ========================= 私 有 函 数 实 现 ========================= ! //
 
 

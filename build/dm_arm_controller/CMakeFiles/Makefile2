@@ -63,8 +63,8 @@ CMAKE_BINARY_DIR = /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_a
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/arm_controller.dir/all
-all: CMakeFiles/eef_controller.dir/all
+all: CMakeFiles/dm_arm_controller_lib.dir/all
+all: CMakeFiles/test_node.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -74,8 +74,8 @@ preinstall:
 # The main recursive "clean" target.
 clean: CMakeFiles/uninstall.dir/clean
 clean: CMakeFiles/dm_arm_controller_uninstall.dir/clean
-clean: CMakeFiles/arm_controller.dir/clean
-clean: CMakeFiles/eef_controller.dir/clean
+clean: CMakeFiles/dm_arm_controller_lib.dir/clean
+clean: CMakeFiles/test_node.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -131,56 +131,56 @@ CMakeFiles/dm_arm_controller_uninstall.dir/clean:
 .PHONY : CMakeFiles/dm_arm_controller_uninstall.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/arm_controller.dir
+# Target rules for target CMakeFiles/dm_arm_controller_lib.dir
 
 # All Build rule for target.
-CMakeFiles/arm_controller.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles --progress-num=1,2 "Built target arm_controller"
-.PHONY : CMakeFiles/arm_controller.dir/all
+CMakeFiles/dm_arm_controller_lib.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles --progress-num=1,2,3 "Built target dm_arm_controller_lib"
+.PHONY : CMakeFiles/dm_arm_controller_lib.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/arm_controller.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/arm_controller.dir/all
+CMakeFiles/dm_arm_controller_lib.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/dm_arm_controller_lib.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles 0
-.PHONY : CMakeFiles/arm_controller.dir/rule
+.PHONY : CMakeFiles/dm_arm_controller_lib.dir/rule
 
 # Convenience name for target.
-arm_controller: CMakeFiles/arm_controller.dir/rule
-.PHONY : arm_controller
+dm_arm_controller_lib: CMakeFiles/dm_arm_controller_lib.dir/rule
+.PHONY : dm_arm_controller_lib
 
 # clean rule for target.
-CMakeFiles/arm_controller.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/arm_controller.dir/build.make CMakeFiles/arm_controller.dir/clean
-.PHONY : CMakeFiles/arm_controller.dir/clean
+CMakeFiles/dm_arm_controller_lib.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/dm_arm_controller_lib.dir/build.make CMakeFiles/dm_arm_controller_lib.dir/clean
+.PHONY : CMakeFiles/dm_arm_controller_lib.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/eef_controller.dir
+# Target rules for target CMakeFiles/test_node.dir
 
 # All Build rule for target.
-CMakeFiles/eef_controller.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles --progress-num=3,4 "Built target eef_controller"
-.PHONY : CMakeFiles/eef_controller.dir/all
+CMakeFiles/test_node.dir/all: CMakeFiles/dm_arm_controller_lib.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_node.dir/build.make CMakeFiles/test_node.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_node.dir/build.make CMakeFiles/test_node.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles --progress-num=4,5 "Built target test_node"
+.PHONY : CMakeFiles/test_node.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/eef_controller.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/eef_controller.dir/all
+CMakeFiles/test_node.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles 5
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_node.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaede-rei/ros2-workspace/moveit-tutorials-ws/build/dm_arm_controller/CMakeFiles 0
-.PHONY : CMakeFiles/eef_controller.dir/rule
+.PHONY : CMakeFiles/test_node.dir/rule
 
 # Convenience name for target.
-eef_controller: CMakeFiles/eef_controller.dir/rule
-.PHONY : eef_controller
+test_node: CMakeFiles/test_node.dir/rule
+.PHONY : test_node
 
 # clean rule for target.
-CMakeFiles/eef_controller.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/eef_controller.dir/build.make CMakeFiles/eef_controller.dir/clean
-.PHONY : CMakeFiles/eef_controller.dir/clean
+CMakeFiles/test_node.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_node.dir/build.make CMakeFiles/test_node.dir/clean
+.PHONY : CMakeFiles/test_node.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

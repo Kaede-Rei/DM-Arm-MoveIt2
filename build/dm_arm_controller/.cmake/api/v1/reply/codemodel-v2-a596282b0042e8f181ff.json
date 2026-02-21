@@ -7,7 +7,7 @@
 				{
 					"build" : ".",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-.-0a898a6c779498a70453.json",
+					"jsonFile" : "directory-.-3303eb47bebed31a2fea.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.12"
@@ -45,9 +45,9 @@
 			[
 				{
 					"directoryIndex" : 0,
-					"id" : "arm_controller::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-arm_controller-2dbe901809886a7e5452.json",
-					"name" : "arm_controller",
+					"id" : "dm_arm_controller_lib::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-dm_arm_controller_lib-9f7dd9860b0bb5025ba0.json",
+					"name" : "dm_arm_controller_lib",
 					"projectIndex" : 0
 				},
 				{
@@ -59,9 +59,9 @@
 				},
 				{
 					"directoryIndex" : 0,
-					"id" : "eef_controller::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-eef_controller-bb4f8c4d1e6bb979cd8f.json",
-					"name" : "eef_controller",
+					"id" : "test_node::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-test_node-a7b4b8dee8bcf0e78095.json",
+					"name" : "test_node",
 					"projectIndex" : 0
 				},
 				{
