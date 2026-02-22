@@ -2,6 +2,8 @@
 #define _tasks_manager_hpp_
 
 #include <vector>
+#include <rclcpp/rclcpp.hpp>
+
 #include "dm_arm_controller/types.hpp"
 
 namespace dm_arm {
@@ -14,7 +16,7 @@ namespace dm_arm {
 
 class TasksManager {
 public:
-    TasksManager();
+    TasksManager(rclcpp::Node::SharedPtr node);
     ~TasksManager() = default;
 
     enum class TaskType {
@@ -49,7 +51,9 @@ public:
     std::vector<Task> get_task_group() const;
 
 private:
+    rclcpp::Node::SharedPtr _node_;
     std::vector<Task> _task_group_;
+
 };
 
 // ! ========================= 模 版 方 法 实 现 ========================= ! //

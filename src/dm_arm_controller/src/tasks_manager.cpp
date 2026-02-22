@@ -14,6 +14,13 @@
 
 // ! ========================= 接 口 类 / 函 数 实 现 ========================= ! //
 
+namespace dm_arm {
+
+TasksManager::TasksManager(rclcpp::Node::SharedPtr node) : _node_(std::move(node)) {
+
+}
+
+}
 
 
 // ! ========================= 私 有 函 数 实 现 ========================= ! //
