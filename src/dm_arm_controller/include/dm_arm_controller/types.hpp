@@ -1,6 +1,11 @@
 #ifndef _types_hpp_
 #define _types_hpp_
 
+#include <string>
+#include <variant>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+
 namespace dm_arm {
 
 // ! ========================= 接 口 变 量 / Typedef 声 明 ========================= ! //
