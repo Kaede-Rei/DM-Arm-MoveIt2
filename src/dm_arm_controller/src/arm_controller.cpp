@@ -511,7 +511,7 @@ DescartesResult ArmController::set_line(const TargetVariant& start, const Target
     }
     else {
         DescartesResult result;
-        result.error_code = ErrorCode::SUCCESS;
+        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
         result.message = "无效的起点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -524,7 +524,7 @@ DescartesResult ArmController::set_line(const TargetVariant& start, const Target
     }
     else {
         DescartesResult result;
-        result.error_code = ErrorCode::SUCCESS;
+        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
         result.message = "无效的终点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -566,7 +566,7 @@ DescartesResult ArmController::set_bezier_curve(const TargetVariant& start, cons
     }
     else {
         DescartesResult result;
-        result.error_code = ErrorCode::SUCCESS;
+        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
         result.message = "无效的起点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -579,7 +579,7 @@ DescartesResult ArmController::set_bezier_curve(const TargetVariant& start, cons
     }
     else {
         DescartesResult result;
-        result.error_code = ErrorCode::SUCCESS;
+        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
         result.message = "无效的途经点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }
@@ -592,7 +592,7 @@ DescartesResult ArmController::set_bezier_curve(const TargetVariant& start, cons
     }
     else {
         DescartesResult result;
-        result.error_code = ErrorCode::SUCCESS;
+        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
         result.message = "无效的终点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
         return result;
     }

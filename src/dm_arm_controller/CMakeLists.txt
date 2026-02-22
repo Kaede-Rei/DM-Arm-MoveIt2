@@ -74,6 +74,7 @@ set(LIB_SOURCES
     # src/library.cpp
     src/arm_controller.cpp
     src/eef_controller.cpp
+    src/tasks_manager.cpp
 )
 
 # 如果没有库文件，则跳过库的创建

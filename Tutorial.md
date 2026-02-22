@@ -976,3 +976,140 @@ void cancel_async() {
     cancel_async();
 }
 ```
+
+# 7. 末端执行器控制
+
+## 7.1. 概述与接口设计
+
+​	在实际应用中，机械臂末端可能挂载各种不同类型的执行器（夹爪、吸盘、焊枪等），为了统一控制接口并支持多态，在 `dm_arm_controller` 中设计了一套基于接口继承的末端执行器架构：
+
+-   **EndEffector**：所有末端执行器的基类，持有 `rclcpp::Node` 和 `eef_name`，提供基础属性访问
+-   **JointEefInterface**：适用于**关节型**末端执行器（如二指夹爪、灵巧手），提供 `set_joint_value`、`open`、`close` 等基于关节角度或命名目标的控制接口
+-   **IoEefInterface**：适用于**IO型**末端执行器（如气动吸盘、电磁铁），提供 `enable_io`、`disable_io` 等开关量控制接口
+-   **PwmEefInterface**：适用于**PWM型**末端执行器（如风扇、无刷电机），提供占空比调节接口
+-   **ForceFeedbackEefInterface**：适用于**力反馈型**末端执行器（如带力控的夹爪），提供力/力矩数据回读接口
+
+​	目前主要实现了 **TwoFingerGripper**（二指夹爪），它同时继承了 `EndEffector`、`JointEefInterface` 和 `ForceFeedbackEefInterface`
+
+## 7.2. 核心类实现
+
+### 7.2.1. EndEffector 基类
+
+```cpp
+class EndEffector {
+public:
+    explicit EndEffector(rclcpp::Node::SharedPtr node, const std::string& eef_name) 
+        : _node_(std::move(node)), _eef_name_(eef_name) {};
+    virtual ~EndEffector() = default;
+
+    // 获取名称
+    virtual const std::string& get_eef_name() const { return _eef_name_; }
+    
+    // 紧急停止
+    virtual void stop() = 0;
+
+    // 能力查询（Feature Query）
+    virtual bool supports_joint_control() const { return false; }
+    virtual bool supports_io_control() const { return false; }
+    virtual bool supports_fluid_control() const { return false; }
+    virtual bool supports_force_feedback() const { return false; }
+    virtual bool supports_grasp_planning() const { return false; }
+
+    // TCP 偏移设置
+    void set_tcp_offset(const geometry_msgs::msg::Pose& tcp_offset);
+    const geometry_msgs::msg::Pose& get_tcp_offset() const;
+    
+protected:
+    rclcpp::Node::SharedPtr node() const { return _node_; }
+
+private:
+    rclcpp::Node::SharedPtr _node_;
+    std::string _eef_name_;
+    geometry_msgs::msg::Pose _tcp_offset_;
+};
+```
+
+### 7.2.2. TwoFingerGripper 实现
+
+​	`TwoFingerGripper` 内部维护了一个 `moveit::planning_interface::MoveGroupInterface` 对象用于实际的运动控制，通过 SRDF 中定义的 **End Effector Group** 来进行规划
+
+```cpp
+class TwoFingerGripper : public EndEffector,
+    public JointEefInterface,
+    public ForceFeedbackEefInterface {
+    
+    // ... 构造函数与接口实现 ...
+    
+private:
+    moveit::planning_interface::MoveGroupInterface _gripper_;
+};
+```
+
+## 7.3. 常用操作
+
+### 7.3.1. 打开与关闭
+
+​	最常用的功能是控制夹爪的开合；`open()` 和 `close()` 方法通过调用 SRDF 中预定义的 **Named Target**（通常命名为 "open" 和 "close"）来实现
+
+```cpp
+// 执行名为 "open" 的预设位姿
+ErrorCode TwoFingerGripper::open() {
+    return execute_preset_pose("open");
+}
+
+// 执行名为 "close" 的预设位姿
+ErrorCode TwoFingerGripper::close() {
+    return execute_preset_pose("close");
+}
+
+ErrorCode TwoFingerGripper::execute_preset_pose(const std::string& pose_name) {
+    _gripper_.setNamedTarget(pose_name);
+    _gripper_.move(); // 阻塞式执行
+    return ErrorCode::SUCCESS;
+}
+```
+
+### 7.3.2. 精确关节控制
+
+​	对于需要控制开口大小的场景，可以使用 `set_joint_value`：
+
+```cpp
+ErrorCode TwoFingerGripper::set_joint_value(const std::string& joint_name, double value) {
+    bool success = _gripper_.setJointValueTarget(joint_name, value);
+    if(!success) {
+        return ErrorCode::TARGET_OUT_OF_BOUNDS; // 目标超出软限位
+    }
+    // 注意：这里仅设置了目标，并未立即执行，通常需要配合 plan_and_execute 使用
+    // 但在 TwoFingerGripper 的封装中，如果需要立即生效，可能需要额外调用 move()
+    // (当前实现中 set_joint_value 仅 setTarget)
+    return ErrorCode::SUCCESS;
+}
+```
+
+> ***注意：** set_joint_value 仅设置规划目标（Set Target），不会自动触发运动；*
+>
+> *若要移动，需随后调用 plan_and_execute() 或 _gripper_.move()*
+
+### 7.3.3. 规划与执行
+
+```cpp
+ErrorCode TwoFingerGripper::plan_and_execute() {
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+
+    // 1. 规划
+    auto err_code = _gripper_.plan(plan);
+    if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
+        return ErrorCode::PLANNING_FAILED;
+    }
+
+    // 2. 执行
+    err_code = _gripper_.execute(plan);
+    if(err_code != moveit::core::MoveItErrorCode::SUCCESS) {
+        return ErrorCode::EXECUTION_FAILED;
+    }
+
+    return ErrorCode::SUCCESS;
+}
+```
+
+
