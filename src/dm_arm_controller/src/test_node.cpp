@@ -88,6 +88,15 @@ int main(int argc, char** argv) {
         RCLCPP_INFO(node->get_logger(), "  关节 [%s]: %.3f", link_names[i].c_str(), joints[i]);
     }
 
+    // ===== 测试 5：末端执行器开闭 ===== //
+    RCLCPP_INFO(node->get_logger(), "测试 5: 末端执行器开闭");
+    RCLCPP_INFO(node->get_logger(), "正在闭合末端执行器...");
+    gripper.close();
+    rclcpp::sleep_for(std::chrono::seconds(2));
+    RCLCPP_INFO(node->get_logger(), "正在打开末端执行器...");
+    gripper.open();
+    rclcpp::sleep_for(std::chrono::seconds(2));
+
     // ===== 测试完成 =====
     RCLCPP_INFO(node->get_logger(), "所有测试完成");
 

@@ -7,19 +7,4 @@ moveit_setup_assistant_config:
   package_settings:
     author_name: Kaede Rei
     author_email: kaerei86@gmail.com
-    generated_timestamp: 1771425079
-  control_xacro:
-    command:
-      - position
-    state:
-      - position
-      - velocity
-  modified_urdf:
-    xacros:
-      - control_xacro
-  control_xacro:
-    command:
-      - position
-    state:
-      - position
-      - velocity
+    generated_timestamp: 1771756574
