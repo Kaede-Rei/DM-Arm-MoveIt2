@@ -74,6 +74,7 @@ public:
     template<class T>
     ErrorCode end_to_base_tf(const T& in, T& out);
 
+    const std::string& get_arm_name() const;
     std::vector<double> get_current_joints() const;
     std::vector<std::string> get_current_link_names() const;
     geometry_msgs::msg::Pose get_current_pose() const;

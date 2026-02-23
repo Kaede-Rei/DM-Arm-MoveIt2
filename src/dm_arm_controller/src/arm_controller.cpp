@@ -20,22 +20,6 @@
 
 namespace dm_arm {
 
-std::string err_to_string(ErrorCode code) {
-    switch(code) {
-        case ErrorCode::SUCCESS: return "SUCCESS";
-        case ErrorCode::ASYNC_TASK_RUNNING: return "ASYNC_TASK_RUNNING";
-        case ErrorCode::INVALID_TARGET_TYPE: return "INVALID_TARGET_TYPE";
-        case ErrorCode::TF_TRANSFORM_FAILED: return "TF_TRANSFORM_FAILED";
-        case ErrorCode::PLANNING_FAILED: return "PLANNING_FAILED";
-        case ErrorCode::EXECUTION_FAILED: return "EXECUTION_FAILED";
-        case ErrorCode::TIME_PARAM_FAILED: return "TIME_PARAM_FAILED";
-        case ErrorCode::EMPTY_WAYPOINTS: return "EMPTY_WAYPOINTS";
-        case ErrorCode::DESCARTES_PLANNING_FAILED: return "DESCARTES_PLANNING_FAILED";
-        case ErrorCode::TARGET_OUT_OF_BOUNDS: return "TARGET_OUT_OF_BOUNDS";
-        default: return "UNKNOWN_ERROR";
-    }
-}
-
 /**
  * @brief ArmController 构造函数：初始化 MoveGroupInterface 并打印规划帧信息
  * @param node 共享指针，指向 ROS 2 节点
@@ -161,7 +145,7 @@ ErrorCode ArmController::set_target(const TargetVariant& target) {
         RCLCPP_INFO(_node_->get_logger(), "设置目标姿态是否成功：%s", success ? "是" : "否");
     }
     else if(auto* pose_stamped = std::get_if<geometry_msgs::msg::PoseStamped>(&target)) {
-        success = _arm_.setPoseTarget(pose_stamped->pose);
+        success = _arm_.setPoseTarget(*pose_stamped);
         RCLCPP_INFO(_node_->get_logger(), "设置目标位姿（带时间戳）是否成功：%s", success ? "是" : "否");
     }
     else {
@@ -205,8 +189,7 @@ ErrorCode ArmController::set_target_in_eef_frame(const TargetVariant& target) {
     }
     else if(auto* pose_stamped = std::get_if<geometry_msgs::msg::PoseStamped>(&target)) {
         auto pose_stamped_tmp = *pose_stamped;
-        end_to_base_tf(pose_stamped_tmp, pose_stamped_tmp);
-        success = _arm_.setPoseTarget(pose_stamped_tmp.pose);
+        success = _arm_.setPoseTarget(pose_stamped_tmp);
         RCLCPP_INFO(_node_->get_logger(), "设置末端坐标系目标位姿（带时间戳）是否成功：%s", success ? "是" : "否");
     }
     else {
@@ -859,6 +842,14 @@ geometry_msgs::msg::Pose ArmController::rpy_to_pose(double roll, double pitch, d
     pose.orientation = rpy_to_quaternion(roll, pitch, yaw);
 
     return pose;
+}
+
+/**
+ * @brief 获取规划组名称
+ * @return 规划组名称
+ */
+const std::string& ArmController::get_arm_name() const {
+    return _arm_.getName();
 }
 
 /**

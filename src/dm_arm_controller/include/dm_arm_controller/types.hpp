@@ -4,6 +4,7 @@
 #include <string>
 #include <variant>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 
 namespace dm_arm {
@@ -13,6 +14,7 @@ namespace dm_arm {
 /**
  * @brief ErrorCode 枚举类：用于表示机械臂和末端执行器命令执行过程中可能出现的各种错误情况
  * @param SUCCESS 表示操作成功完成
+ *
  * @param ASYNC_TASK_RUNNING 表示当前已有异步任务正在执行，无法执行新任务
  * @param INVALID_TARGET_TYPE 表示提供的目标类型无效，无法识别或处理
  * @param TF_TRANSFORM_FAILED 表示坐标变换失败，可能是由于TF树中缺少必要的变换或变换数据不正确导致
@@ -22,9 +24,16 @@ namespace dm_arm {
  * @param EMPTY_WAYPOINTS 表示提供的路径点列表为空，无法进行规划
  * @param DESCARTES_PLANNING_FAILED 表示笛卡尔空间规划失败，可能是由于路径点不可达、规划算法失败或其他笛卡尔规划问题导致
  * @param TARGET_OUT_OF_BOUNDS 表示目标超出机器人工作空间或关节限制，无法执行
+ *
+ * @param TASK_GROUP_EXISTS 表示尝试创建的任务组已存在，无法创建
+ * @param TASK_GROUP_NOT_FOUND 表示指定的任务组未找到，无法执行相关操作
+ * @param TASK_EXISTS 表示尝试创建的任务已存在，无法创建
+ * @param TASK_NOT_FOUND 表示指定的任务未找到，无法执行相关操作
+ * @note 每新增一个错误码，都应该在 err_to_string 函数中添加对应的字符串表示，以便于日志记录和调试
  */
 enum class ErrorCode {
     SUCCESS = 0,
+
     ASYNC_TASK_RUNNING,
     INVALID_TARGET_TYPE,
     TF_TRANSFORM_FAILED,
@@ -33,7 +42,12 @@ enum class ErrorCode {
     TIME_PARAM_FAILED,
     EMPTY_WAYPOINTS,
     DESCARTES_PLANNING_FAILED,
-    TARGET_OUT_OF_BOUNDS
+    TARGET_OUT_OF_BOUNDS,
+
+    TASK_GROUP_EXISTS,
+    TASK_GROUP_NOT_FOUND,
+    TASK_EXISTS,
+    TASK_NOT_FOUND,
 };
 
 /**
@@ -41,7 +55,25 @@ enum class ErrorCode {
  * @param code 要转换的 ErrorCode 枚举值
  * @return 对应的字符串表示，例如 "SUCCESS"、"PLANNING_FAILED"
  */
-std::string err_to_string(ErrorCode code);
+inline std::string err_to_string(ErrorCode code) {
+    switch(code) {
+        case ErrorCode::SUCCESS: return "SUCCESS";
+        case ErrorCode::ASYNC_TASK_RUNNING: return "ASYNC_TASK_RUNNING";
+        case ErrorCode::INVALID_TARGET_TYPE: return "INVALID_TARGET_TYPE";
+        case ErrorCode::TF_TRANSFORM_FAILED: return "TF_TRANSFORM_FAILED";
+        case ErrorCode::PLANNING_FAILED: return "PLANNING_FAILED";
+        case ErrorCode::EXECUTION_FAILED: return "EXECUTION_FAILED";
+        case ErrorCode::TIME_PARAM_FAILED: return "TIME_PARAM_FAILED";
+        case ErrorCode::EMPTY_WAYPOINTS: return "EMPTY_WAYPOINTS";
+        case ErrorCode::DESCARTES_PLANNING_FAILED: return "DESCARTES_PLANNING_FAILED";
+        case ErrorCode::TARGET_OUT_OF_BOUNDS: return "TARGET_OUT_OF_BOUNDS";
+        case ErrorCode::TASK_GROUP_EXISTS: return "TASK_GROUP_EXISTS";
+        case ErrorCode::TASK_GROUP_NOT_FOUND: return "TASK_GROUP_NOT_FOUND";
+        case ErrorCode::TASK_EXISTS: return "TASK_EXISTS";
+        case ErrorCode::TASK_NOT_FOUND: return "TASK_NOT_FOUND";
+        default: return "UNKNOWN_ERROR";
+    }
+}
 
 /**
  * @brief 目标类型：位姿（Pose）、位置（Point）、姿态（Quaternion）或带时间戳的位姿（PoseStamped）
