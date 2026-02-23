@@ -28,6 +28,7 @@ set(DEPENDENCIES
     # dependencies_name
     rclcpp
     moveit_ros_planning_interface
+    moveit_task_constructor_core
 )
 
 # 必需依赖

@@ -23,3 +23,7 @@
       vel_scale: 0.1
       acc_scale: 0.1
       min_success_rate: 0.8
+
+    tasks_manager:
+      max_retries: 3
+      max_solutions: 10

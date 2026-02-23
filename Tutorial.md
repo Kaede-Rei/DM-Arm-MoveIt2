@@ -1112,4 +1112,22 @@ ErrorCode TwoFingerGripper::plan_and_execute() {
 }
 ```
 
+# 8. MTC 任务规划
 
+## 8.1 MTC 基础
+
+​	MTC(MoveIt Task Constructor) 是
+
+## 8.2 编译与调用
+
+-   **编译 MTC：** 将 MTC 功能包克隆到 `src/` 后用 `rosdep` 安装缺失的功能包，再编译
+
+    ```bash
+    cd src/
+    git clone -b humble https://github.com/moveit/moveit_task_constructor.git
+    rosdep install --from-paths . --ignore-src --rosdistro $ROS_DISTRO
+    cd ..
+    colcon build
+    ```
+
+-   
