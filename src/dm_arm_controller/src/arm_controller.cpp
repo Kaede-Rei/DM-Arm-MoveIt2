@@ -131,7 +131,7 @@ ErrorCode ArmController::set_target(const TargetVariant& target) {
     }
 
     // 使用 std::visit 处理所有类型的 target（缺失时会编译错误）
-    bool success = std::visit(overloaded{
+    bool success = std::visit(variant_visitor{
         [this](const geometry_msgs::msg::Pose& pose) {
             bool res = this->_arm_.setPoseTarget(pose);
             RCLCPP_INFO(this->_node_->get_logger(), "设置目标位姿是否成功：%s", res ? "是" : "否");
@@ -168,7 +168,7 @@ ErrorCode ArmController::set_target_in_eef_frame(const TargetVariant& target) {
         return ErrorCode::ASYNC_TASK_RUNNING;
     }
 
-    bool success = std::visit(overloaded{
+    bool success = std::visit(variant_visitor{
         [this](const geometry_msgs::msg::Pose& pose) {
             geometry_msgs::msg::Pose transformed_pose;
             end_to_base_tf(pose, transformed_pose);
@@ -821,7 +821,7 @@ std::vector<std::string> ArmController::get_current_link_names() const {
 // ! ========================= 私 有 函 数 实 现 ========================= ! //
 
 geometry_msgs::msg::Pose ArmController::extract_pose_from_target(const TargetVariant& target) const {
-    return std::visit(overloaded{
+    return std::visit(variant_visitor{
         [](const geometry_msgs::msg::Pose& pose) {
             return pose;
         },

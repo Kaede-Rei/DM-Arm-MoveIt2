@@ -88,8 +88,6 @@ using TargetVariant = std::variant<
     geometry_msgs::msg::Quaternion,
     geometry_msgs::msg::PoseStamped
 >;
-template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 /**
  * @brief DescartesResult 结构体：用于封装笛卡尔空间规划的结果，包括成功与否、成功率、消息和规划得到的轨迹
@@ -114,6 +112,36 @@ enum class TimeParamMethod {
     TOTG,
     ISP,
 };
+
+// ! ========================= 模 版 方 法 实 现 ========================= ! //
+
+/**
+ * @brief 变体访问者结构体：用于 std::visit 访问 std::variant 中的不同类型，提供统一的接口来处理不同类型的目标
+ * @tparam Ts 可变参数模板，接受 std::variant 中的所有类型
+ * @note 使用示例：
+ * @note auto result = std::visit(variant_visitor{
+ * @note    [](const geometry_msgs::msg::Pose& pose) {
+ * @note        // 处理 Pose 类型的目标
+ * @note    },
+ * @note    [](const geometry_msgs::msg::Point& point) {
+ * @note        // 处理 Point 类型的目标
+ * @note    },
+ * @note    }, target);
+ * @note 其中 target 是一个 TargetVariant 类型的变量，variant_visitor 将根据 target 中实际存储的类型调用对应的 lambda 函数进行处理
+ */
+template<class... Ts>
+struct variant_visitor : Ts... {
+    using Ts::operator()...;
+};
+
+/**
+ * @brief 变体访问者模板参数推导指南：允许编译器根据传入的可调用对象自动推导 variant_visitor 的模板参数，无需显式指定
+ * @tparam Ts 可变参数模板，接受 std::variant 中的所有类型
+ * @param Ts... 可调用对象的参数包，编译器将根据这些参数自动推导 variant_visitor 的模板参数
+ * @return 构造好的 variant_visitor 实例，包含所有传入的可调用对象的 operator() 重载
+ */
+template<class... Ts>
+variant_visitor(Ts...) -> variant_visitor<Ts...>;
 
 } /* namespace dm_arm */
 
