@@ -320,7 +320,29 @@ ErrorCode TasksManager::sort_tasks(TaskGroup& task_group) {
 }
 
 double TasksManager::calculate_dist(const TargetVariant& base, const TargetVariant& target, float weight_orient) {
+    // 计算位置距离
+    double pos_dist = 0.0;
+    if(std::holds_alternative<geometry_msgs::msg::Pose>(base) && std::holds_alternative<geometry_msgs::msg::Pose>(target)) {
+        const auto& base_pose = std::get<geometry_msgs::msg::Pose>(base);
+        const auto& target_pose = std::get<geometry_msgs::msg::Pose>(target);
+        pos_dist = std::sqrt(std::pow(base_pose.position.x - target_pose.position.x, 2) +
+            std::pow(base_pose.position.y - target_pose.position.y, 2) +
+            std::pow(base_pose.position.z - target_pose.position.z, 2));
+    }
 
+    // 计算姿态距离
+    double orient_dist = 0.0;
+    if(std::holds_alternative<geometry_msgs::msg::Pose>(base) && std::holds_alternative<geometry_msgs::msg::Pose>(target)) {
+        const auto& base_pose = std::get<geometry_msgs::msg::Pose>(base);
+        const auto& target_pose = std::get<geometry_msgs::msg::Pose>(target);
+        orient_dist = std::sqrt(std::pow(base_pose.orientation.x - target_pose.orientation.x, 2) +
+            std::pow(base_pose.orientation.y - target_pose.orientation.y, 2) +
+            std::pow(base_pose.orientation.z - target_pose.orientation.z, 2) +
+            std::pow(base_pose.orientation.w - target_pose.orientation.w, 2));
+    }
+
+    // 综合位置和姿态距离，使用权重进行加权
+    return (1.0 - weight_orient) * pos_dist + weight_orient * orient_dist;
 }
 
 }
