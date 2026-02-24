@@ -86,6 +86,24 @@ ErrorCode TasksManager::clear_task_group(const std::string& group_name) {
     return ErrorCode::SUCCESS;
 }
 
+ErrorCode TasksManager::set_dist_sort_weight_orient(const std::string& group_name, float weight_orient) {
+    auto it = _task_groups_.find(group_name);
+    if(it == _task_groups_.end()) {
+        RCLCPP_WARN(_node_->get_logger(), "任务组 '%s' 不存在，无法设置排序权重", group_name.c_str());
+        return ErrorCode::TASK_GROUP_NOT_FOUND;
+    }
+
+    if(weight_orient < 0.0f || weight_orient > 1.0f) {
+        RCLCPP_WARN(_node_->get_logger(), "排序权重必须在 [0, 1] 范围内，当前值：%f", weight_orient);
+        return ErrorCode::INVALID_PARAMETER;
+    }
+
+    it->second.weight_orient = weight_orient;
+    RCLCPP_INFO(_node_->get_logger(), "成功设置任务组 '%s' 的距离排序姿态权重为 %f", group_name.c_str(), weight_orient);
+
+    return ErrorCode::SUCCESS;
+}
+
 /**
  * @brief 向任务组中添加任务
  * @param group_name 任务组名称
@@ -254,20 +272,55 @@ Task* TasksManager::find_task(const std::string& group_name, int id, ErrorCode& 
  */
 ErrorCode TasksManager::sort_tasks(TaskGroup& task_group) {
     task_group.sorted_tasks.clear();
-    for(auto& [id, task] : task_group.tasks) {
-        task_group.sorted_tasks.push_back(task);
-        task_group.sorted_tasks.back().id = id;
-    }
 
+    // 按 ID 排序
     if(task_group.sort_type == SortType::ID) {
+        for(auto& [id, task] : task_group.tasks) {
+            task_group.sorted_tasks.push_back(task);
+            task_group.sorted_tasks.back().id = id;
+        }
         RCLCPP_INFO(_node_->get_logger(), "任务组已按 ID 排序");
     }
+    // 基于位置 + 姿态权重的距离，进行最近邻 + 2-opt 排序
     else if(task_group.sort_type == SortType::DIST) {
-        // TODO: 实现按距离排序的逻辑
-        RCLCPP_WARN(_node_->get_logger(), "按距离排序功能尚未实现");
+        // 第一次排序：找到距离当前机械臂位姿最近的任务，放在 sorted_tasks 的开头
+        unsigned int nearest_id = 0;
+        double nearest_dist = -1.0;
+        for(auto& [id, task] : task_group.tasks) {
+            double dist = calculate_dist(_arm_->get_current_pose(), task.target, task_group.weight_orient);
+            if(nearest_dist < 0 || dist < nearest_dist) {
+                nearest_dist = dist;
+                nearest_id = id;
+            }
+        }
+        task_group.sorted_tasks.push_back(task_group.tasks[nearest_id]);
+
+        // 后续排序：每次找到距离 sorted_tasks 中最后一个任务最近的任务，依次添加到 sorted_tasks 末尾，直到所有任务都被排序
+        nearest_dist = -1.0;
+        while(task_group.sorted_tasks.size() < task_group.tasks.size()) {
+            const auto& last_task = task_group.sorted_tasks.back();
+            nearest_id = 0;
+            for(auto& [id, task] : task_group.tasks) {
+                if(last_task.id == id) {
+                    continue;
+                }
+                double dist = calculate_dist(last_task.target, task.target, task_group.weight_orient);
+                if(nearest_dist < 0 || dist < nearest_dist) {
+                    nearest_dist = dist;
+                    nearest_id = id;
+                }
+            }
+            task_group.sorted_tasks.push_back(task_group.tasks[nearest_id]);
+        }
+
+        RCLCPP_INFO(_node_->get_logger(), "任务组已按加权距离排序");
     }
 
     return ErrorCode::SUCCESS;
+}
+
+double TasksManager::calculate_dist(const TargetVariant& base, const TargetVariant& target, float weight_orient) {
+
 }
 
 }

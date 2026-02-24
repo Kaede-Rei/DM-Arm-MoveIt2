@@ -48,6 +48,7 @@ enum class ErrorCode {
     TASK_GROUP_NOT_FOUND,
     TASK_EXISTS,
     TASK_NOT_FOUND,
+    INVALID_PARAMETER
 };
 
 /**
@@ -71,6 +72,7 @@ inline std::string err_to_string(ErrorCode code) {
         case ErrorCode::TASK_GROUP_NOT_FOUND: return "TASK_GROUP_NOT_FOUND";
         case ErrorCode::TASK_EXISTS: return "TASK_EXISTS";
         case ErrorCode::TASK_NOT_FOUND: return "TASK_NOT_FOUND";
+        case ErrorCode::INVALID_PARAMETER: return "INVALID_PARAMETER";
         default: return "UNKNOWN_ERROR";
     }
 }
