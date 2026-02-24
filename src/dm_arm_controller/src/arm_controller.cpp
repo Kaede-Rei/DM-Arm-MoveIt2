@@ -130,28 +130,29 @@ ErrorCode ArmController::set_target(const TargetVariant& target) {
         return ErrorCode::ASYNC_TASK_RUNNING;
     }
 
-    bool success = false;
-
-    if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&target)) {
-        success = _arm_.setPoseTarget(*pose);
-        RCLCPP_INFO(_node_->get_logger(), "设置目标位姿是否成功：%s", success ? "是" : "否");
-    }
-    else if(auto* point = std::get_if<geometry_msgs::msg::Point>(&target)) {
-        success = _arm_.setPositionTarget(point->x, point->y, point->z);
-        RCLCPP_INFO(_node_->get_logger(), "设置目标位置是否成功：%s", success ? "是" : "否");
-    }
-    else if(auto* quat = std::get_if<geometry_msgs::msg::Quaternion>(&target)) {
-        success = _arm_.setOrientationTarget(quat->x, quat->y, quat->z, quat->w);
-        RCLCPP_INFO(_node_->get_logger(), "设置目标姿态是否成功：%s", success ? "是" : "否");
-    }
-    else if(auto* pose_stamped = std::get_if<geometry_msgs::msg::PoseStamped>(&target)) {
-        success = _arm_.setPoseTarget(*pose_stamped);
-        RCLCPP_INFO(_node_->get_logger(), "设置目标位姿（带时间戳）是否成功：%s", success ? "是" : "否");
-    }
-    else {
-        RCLCPP_WARN(_node_->get_logger(), "不支持的目标类型：%s", typeid(target).name());
-        return ErrorCode::INVALID_TARGET_TYPE;
-    }
+    // 使用 std::visit 处理所有类型的 target（缺失时会编译错误）
+    bool success = std::visit(overloaded{
+        [this](const geometry_msgs::msg::Pose& pose) {
+            bool res = this->_arm_.setPoseTarget(pose);
+            RCLCPP_INFO(this->_node_->get_logger(), "设置目标位姿是否成功：%s", res ? "是" : "否");
+            return res;
+        },
+        [this](const geometry_msgs::msg::Point& point) {
+            bool res = this->_arm_.setPositionTarget(point.x, point.y, point.z);
+            RCLCPP_INFO(this->_node_->get_logger(), "设置目标位置是否成功：%s", res ? "是" : "否");
+            return res;
+        },
+        [this](const geometry_msgs::msg::Quaternion& quat) {
+            bool res = this->_arm_.setOrientationTarget(quat.x, quat.y, quat.z, quat.w);
+            RCLCPP_INFO(this->_node_->get_logger(), "设置目标姿态是否成功：%s", res ? "是" : "否");
+            return res;
+        },
+        [this](const geometry_msgs::msg::PoseStamped& pose_stamped) {
+            bool res = this->_arm_.setPoseTarget(pose_stamped);
+            RCLCPP_INFO(this->_node_->get_logger(), "设置目标位姿（带时间戳）是否成功：%s", res ? "是" : "否");
+            return res;
+        }
+        }, target);
 
     return success ? ErrorCode::SUCCESS : ErrorCode::TARGET_OUT_OF_BOUNDS;
 }
@@ -167,35 +168,36 @@ ErrorCode ArmController::set_target_in_eef_frame(const TargetVariant& target) {
         return ErrorCode::ASYNC_TASK_RUNNING;
     }
 
-    bool success = false;
-
-    if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&target)) {
-        auto pose_tmp = *pose;
-        end_to_base_tf(pose_tmp, pose_tmp);
-        success = _arm_.setPoseTarget(pose_tmp);
-        RCLCPP_INFO(_node_->get_logger(), "设置末端坐标系目标位姿是否成功：%s", success ? "是" : "否");
-    }
-    else if(auto* point = std::get_if<geometry_msgs::msg::Point>(&target)) {
-        auto point_tmp = *point;
-        end_to_base_tf(point_tmp, point_tmp);
-        success = _arm_.setPositionTarget(point_tmp.x, point_tmp.y, point_tmp.z);
-        RCLCPP_INFO(_node_->get_logger(), "设置末端坐标系目标位置是否成功：%s", success ? "是" : "否");
-    }
-    else if(auto* quat = std::get_if<geometry_msgs::msg::Quaternion>(&target)) {
-        auto quat_tmp = *quat;
-        end_to_base_tf(quat_tmp, quat_tmp);
-        success = _arm_.setOrientationTarget(quat_tmp.x, quat_tmp.y, quat_tmp.z, quat_tmp.w);
-        RCLCPP_INFO(_node_->get_logger(), "设置末端坐标系目标姿态是否成功：%s", success ? "是" : "否");
-    }
-    else if(auto* pose_stamped = std::get_if<geometry_msgs::msg::PoseStamped>(&target)) {
-        auto pose_stamped_tmp = *pose_stamped;
-        success = _arm_.setPoseTarget(pose_stamped_tmp);
-        RCLCPP_INFO(_node_->get_logger(), "设置末端坐标系目标位姿（带时间戳）是否成功：%s", success ? "是" : "否");
-    }
-    else {
-        RCLCPP_WARN(_node_->get_logger(), "不支持的目标类型：%s", typeid(target).name());
-        return ErrorCode::INVALID_TARGET_TYPE;
-    }
+    bool success = std::visit(overloaded{
+        [this](const geometry_msgs::msg::Pose& pose) {
+            geometry_msgs::msg::Pose transformed_pose;
+            end_to_base_tf(pose, transformed_pose);
+            bool res = this->_arm_.setPoseTarget(transformed_pose);
+            RCLCPP_INFO(this->_node_->get_logger(), "设置末端坐标系目标位姿是否成功：%s", res ? "是" : "否");
+            return res;
+        },
+        [this](const geometry_msgs::msg::Point& point) {
+            geometry_msgs::msg::Point transformed_point;
+            end_to_base_tf(point, transformed_point);
+            bool res = this->_arm_.setPositionTarget(transformed_point.x, transformed_point.y, transformed_point.z);
+            RCLCPP_INFO(this->_node_->get_logger(), "设置末端坐标系目标位置是否成功：%s", res ? "是" : "否");
+            return res;
+        },
+        [this](const geometry_msgs::msg::Quaternion& quat) {
+            geometry_msgs::msg::Quaternion transformed_quat;
+            end_to_base_tf(quat, transformed_quat);
+            bool res = this->_arm_.setOrientationTarget(transformed_quat.x, transformed_quat.y, transformed_quat.z, transformed_quat.w);
+            RCLCPP_INFO(this->_node_->get_logger(), "设置末端坐标系目标姿态是否成功：%s", res ? "是" : "否");
+            return res;
+        },
+        [this](const geometry_msgs::msg::PoseStamped& pose_stamped) {
+            geometry_msgs::msg::PoseStamped transformed_pose_stamped;
+            end_to_base_tf(pose_stamped, transformed_pose_stamped);
+            bool res = this->_arm_.setPoseTarget(transformed_pose_stamped);
+            RCLCPP_INFO(this->_node_->get_logger(), "设置末端坐标系目标位姿（带时间戳）是否成功：%s", res ? "是" : "否");
+            return res;
+        }
+        }, target);
 
     return success ? ErrorCode::SUCCESS : ErrorCode::TARGET_OUT_OF_BOUNDS;
 }
@@ -485,32 +487,8 @@ DescartesResult ArmController::set_line(const TargetVariant& start, const Target
     geometry_msgs::msg::Pose start_pose;
     geometry_msgs::msg::Pose end_pose;
 
-    if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&start)) {
-        start_pose = *pose;
-    }
-    else if(auto* point = std::get_if<geometry_msgs::msg::Point>(&start)) {
-        start_pose.position = *point;
-        start_pose.orientation = get_current_pose().orientation;
-    }
-    else {
-        DescartesResult result;
-        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
-        result.message = "无效的起点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
-        return result;
-    }
-    if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&end)) {
-        end_pose = *pose;
-    }
-    else if(auto* point = std::get_if<geometry_msgs::msg::Point>(&end)) {
-        end_pose.position = *point;
-        end_pose.orientation = get_current_pose().orientation;
-    }
-    else {
-        DescartesResult result;
-        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
-        result.message = "无效的终点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
-        return result;
-    }
+    start_pose = extract_pose_from_target(start);
+    end_pose = extract_pose_from_target(end);
 
     // 创建路径点列表
     std::vector<geometry_msgs::msg::Pose> waypoints;
@@ -540,45 +518,9 @@ DescartesResult ArmController::set_bezier_curve(const TargetVariant& start, cons
     geometry_msgs::msg::Pose via_pose;
     geometry_msgs::msg::Pose end_pose;
 
-    if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&start)) {
-        start_pose = *pose;
-    }
-    else if(auto* point = std::get_if<geometry_msgs::msg::Point>(&start)) {
-        start_pose.position = *point;
-        start_pose.orientation = get_current_pose().orientation;
-    }
-    else {
-        DescartesResult result;
-        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
-        result.message = "无效的起点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
-        return result;
-    }
-    if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&via)) {
-        via_pose = *pose;
-    }
-    else if(auto* point = std::get_if<geometry_msgs::msg::Point>(&via)) {
-        via_pose.position = *point;
-        via_pose.orientation = get_current_pose().orientation;
-    }
-    else {
-        DescartesResult result;
-        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
-        result.message = "无效的途经点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
-        return result;
-    }
-    if(auto* pose = std::get_if<geometry_msgs::msg::Pose>(&end)) {
-        end_pose = *pose;
-    }
-    else if(auto* point = std::get_if<geometry_msgs::msg::Point>(&end)) {
-        end_pose.position = *point;
-        end_pose.orientation = get_current_pose().orientation;
-    }
-    else {
-        DescartesResult result;
-        result.error_code = ErrorCode::INVALID_TARGET_TYPE;
-        result.message = "无效的终点类型，必须为 geometry_msgs::msg::Pose 或 geometry_msgs::msg::Point";
-        return result;
-    }
+    start_pose = extract_pose_from_target(start);
+    via_pose = extract_pose_from_target(via);
+    end_pose = extract_pose_from_target(end);
 
     // 计算曲线路径上的分段点
     std::vector<geometry_msgs::msg::Pose> waypoints;
@@ -876,8 +818,29 @@ std::vector<std::string> ArmController::get_current_link_names() const {
     return _arm_.getJointNames();
 }
 
-} /* namespace dm_arm */
-
 // ! ========================= 私 有 函 数 实 现 ========================= ! //
 
+geometry_msgs::msg::Pose ArmController::extract_pose_from_target(const TargetVariant& target) const {
+    return std::visit(overloaded{
+        [](const geometry_msgs::msg::Pose& pose) {
+            return pose;
+        },
+        [this](const geometry_msgs::msg::Point& point) {
+            geometry_msgs::msg::Pose pose;
+            pose.position = point;
+            pose.orientation = this->get_current_pose().orientation;
+            return pose;
+        },
+        [this](const geometry_msgs::msg::Quaternion& quat) {
+            geometry_msgs::msg::Pose pose;
+            pose.position = this->get_current_pose().position;
+            pose.orientation = quat;
+            return pose;
+        },
+        [](const geometry_msgs::msg::PoseStamped& pose_stamped) {
+            return pose_stamped.pose;
+        }
+        }, target);
+}
 
+} /* namespace dm_arm */

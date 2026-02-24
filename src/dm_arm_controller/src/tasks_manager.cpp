@@ -183,7 +183,7 @@ ErrorCode TasksManager::execute_task(Task& task) {
     if(task.type == TaskType::NONE) {
         _arm_->set_target(task.target);
         _arm_->plan_and_execute();
-        RCLCPP_INFO(_node_->get_logger(), "无特定任务，正在移动到制定目标...");
+        RCLCPP_INFO(_node_->get_logger(), "无特定任务，正在移动到指定目标...");
     }
     else if(task.type == TaskType::PICK) {
         // TODO: 实现 PICK 任务的具体逻辑，例如控制末端执行器抓取物体等

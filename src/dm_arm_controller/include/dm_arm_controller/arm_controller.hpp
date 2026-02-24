@@ -116,6 +116,8 @@ private:
     std::atomic<bool> _is_planning_or_executing_{ false };
     /// @brief 异步规划执行实例
     std::thread _async_thread_;
+
+    geometry_msgs::msg::Pose extract_pose_from_target(const TargetVariant& target) const;
 };
 
 

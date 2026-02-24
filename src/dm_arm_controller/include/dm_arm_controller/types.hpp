@@ -88,6 +88,8 @@ using TargetVariant = std::variant<
     geometry_msgs::msg::Quaternion,
     geometry_msgs::msg::PoseStamped
 >;
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 /**
  * @brief DescartesResult 结构体：用于封装笛卡尔空间规划的结果，包括成功与否、成功率、消息和规划得到的轨迹
