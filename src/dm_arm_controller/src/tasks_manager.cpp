@@ -283,34 +283,44 @@ ErrorCode TasksManager::sort_tasks(TaskGroup& task_group) {
     }
     // 基于位置 + 姿态权重的距离，进行最近邻 + 2-opt 排序
     else if(task_group.sort_type == SortType::DIST) {
+        std::set<unsigned int> visited_ids;
+
         // 第一次排序：找到距离当前机械臂位姿最近的任务，放在 sorted_tasks 的开头
-        unsigned int nearest_id = 0;
-        double nearest_dist = -1.0;
+        unsigned int cur_id = 0;
+        double min_dist = -1.0;
         for(auto& [id, task] : task_group.tasks) {
             double dist = calculate_dist(_arm_->get_current_pose(), task.target, task_group.weight_orient);
-            if(nearest_dist < 0 || dist < nearest_dist) {
-                nearest_dist = dist;
-                nearest_id = id;
+            if(min_dist < 0 || dist < min_dist) {
+                min_dist = dist;
+                cur_id = id;
             }
         }
-        task_group.sorted_tasks.push_back(task_group.tasks[nearest_id]);
 
         // 后续排序：每次找到距离 sorted_tasks 中最后一个任务最近的任务，依次添加到 sorted_tasks 末尾，直到所有任务都被排序
-        nearest_dist = -1.0;
         while(task_group.sorted_tasks.size() < task_group.tasks.size()) {
-            const auto& last_task = task_group.sorted_tasks.back();
-            nearest_id = 0;
-            for(auto& [id, task] : task_group.tasks) {
-                if(last_task.id == id) {
-                    continue;
-                }
-                double dist = calculate_dist(last_task.target, task.target, task_group.weight_orient);
-                if(nearest_dist < 0 || dist < nearest_dist) {
-                    nearest_dist = dist;
-                    nearest_id = id;
+            // 将当前最近的任务添加到 sorted_tasks 中，并标记为已访问
+            auto cur_task = task_group.tasks.find(cur_id);
+            task_group.sorted_tasks.push_back(cur_task->second);
+            task_group.sorted_tasks.back().id = cur_id;
+            visited_ids.insert(cur_id);
+
+            // 最后一次排序：如果所有任务都已访问，则结束排序
+            if(visited_ids.size() == task_group.tasks.size()) break;
+
+            // 寻找下一个最近的点
+            double min_dist = -1.0;
+            unsigned int next_id = 0;
+            for(const auto& [id, task] : task_group.tasks) {
+                // 跳过已访问的任务
+                if(visited_ids.count(id) > 0) continue;
+
+                double dist = calculate_dist(task_group.sorted_tasks.back().target, task.target, task_group.weight_orient);
+                if(min_dist < 0 || dist < min_dist) {
+                    min_dist = dist;
+                    next_id = id;
                 }
             }
-            task_group.sorted_tasks.push_back(task_group.tasks[nearest_id]);
+            cur_id = next_id;
         }
 
         RCLCPP_INFO(_node_->get_logger(), "任务组已按加权距离排序");
@@ -319,27 +329,49 @@ ErrorCode TasksManager::sort_tasks(TaskGroup& task_group) {
     return ErrorCode::SUCCESS;
 }
 
+/**
+ * @brief 计算两个目标之间的加权距离，综合考虑位置和姿态的差异
+ * @param base 基准目标，可以是位姿、位置或姿态等
+ * @param target 目标，可以是位姿、位置或姿态等
+ * @param weight_orient 姿态在距离计算中的权重，范围 [0, 1]，默认为 0.3
+ * @return 计算得到的加权距离，数值越小表示两个目标越接近
+ */
 double TasksManager::calculate_dist(const TargetVariant& base, const TargetVariant& target, float weight_orient) {
     // 计算位置距离
-    double pos_dist = 0.0;
-    if(std::holds_alternative<geometry_msgs::msg::Pose>(base) && std::holds_alternative<geometry_msgs::msg::Pose>(target)) {
-        const auto& base_pose = std::get<geometry_msgs::msg::Pose>(base);
-        const auto& target_pose = std::get<geometry_msgs::msg::Pose>(target);
-        pos_dist = std::sqrt(std::pow(base_pose.position.x - target_pose.position.x, 2) +
-            std::pow(base_pose.position.y - target_pose.position.y, 2) +
-            std::pow(base_pose.position.z - target_pose.position.z, 2));
-    }
+    auto get_position = variant_visitor{
+        [](const geometry_msgs::msg::Pose& pose) {return pose.position; },
+        [](const geometry_msgs::msg::Point& point) {return point; },
+        [](const geometry_msgs::msg::Quaternion&) {
+            geometry_msgs::msg::Point zero_point;
+            zero_point.x = 0.0;
+            zero_point.y = 0.0;
+            zero_point.z = 0.0;
+            return zero_point;
+        },
+        [](const geometry_msgs::msg::PoseStamped& pose_stamped) {return pose_stamped.pose.position; }
+    };
+    geometry_msgs::msg::Point base_pos = std::visit(get_position, base);
+    geometry_msgs::msg::Point target_pos = std::visit(get_position, target);
+    double pos_dist = std::sqrt(std::pow(base_pos.x - target_pos.x, 2) + std::pow(base_pos.y - target_pos.y, 2) + std::pow(base_pos.z - target_pos.z, 2));
 
     // 计算姿态距离
     double orient_dist = 0.0;
-    if(std::holds_alternative<geometry_msgs::msg::Pose>(base) && std::holds_alternative<geometry_msgs::msg::Pose>(target)) {
-        const auto& base_pose = std::get<geometry_msgs::msg::Pose>(base);
-        const auto& target_pose = std::get<geometry_msgs::msg::Pose>(target);
-        orient_dist = std::sqrt(std::pow(base_pose.orientation.x - target_pose.orientation.x, 2) +
-            std::pow(base_pose.orientation.y - target_pose.orientation.y, 2) +
-            std::pow(base_pose.orientation.z - target_pose.orientation.z, 2) +
-            std::pow(base_pose.orientation.w - target_pose.orientation.w, 2));
-    }
+    auto get_orientation = variant_visitor{
+        [](const geometry_msgs::msg::Pose& pose) {return pose.orientation; },
+        [](const geometry_msgs::msg::Point&) {
+            geometry_msgs::msg::Quaternion zero_quat;
+            zero_quat.x = 0.0;
+            zero_quat.y = 0.0;
+            zero_quat.z = 0.0;
+            zero_quat.w = 1.0;
+            return zero_quat;
+        },
+        [](const geometry_msgs::msg::Quaternion& quat) {return quat; },
+        [](const geometry_msgs::msg::PoseStamped& pose_stamped) {return pose_stamped.pose.orientation; }
+    };
+    geometry_msgs::msg::Quaternion base_orient = std::visit(get_orientation, base);
+    geometry_msgs::msg::Quaternion target_orient = std::visit(get_orientation, target);
+    orient_dist = std::sqrt(std::pow(base_orient.x - target_orient.x, 2) + std::pow(base_orient.y - target_orient.y, 2) + std::pow(base_orient.z - target_orient.z, 2) + std::pow(base_orient.w - target_orient.w, 2));
 
     // 综合位置和姿态距离，使用权重进行加权
     return (1.0 - weight_orient) * pos_dist + weight_orient * orient_dist;
