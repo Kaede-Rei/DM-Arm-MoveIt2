@@ -80,6 +80,8 @@ private:
     Task* find_task(const std::string& group_name, int id, ErrorCode& error_code);
     ErrorCode sort_tasks(TaskGroup& task_group);
     double calculate_dist(const TargetVariant& base, const TargetVariant& target, float weight_orient = 0.3);
+    void optimize_with_2opt(std::vector<Task>& path, float weight_orient = 0.3);
+
 };
 
 // ! ========================= 接 口 函 数 声 明 ========================= ! //

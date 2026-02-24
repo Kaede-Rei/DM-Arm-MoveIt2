@@ -283,6 +283,7 @@ ErrorCode TasksManager::sort_tasks(TaskGroup& task_group) {
     }
     // 基于位置 + 姿态权重的距离，进行最近邻 + 2-opt 排序
     else if(task_group.sort_type == SortType::DIST) {
+        // 使用一个集合来记录已经访问过的任务 ID，避免重复访问
         std::set<unsigned int> visited_ids;
 
         // 第一次排序：找到距离当前机械臂位姿最近的任务，放在 sorted_tasks 的开头
@@ -309,7 +310,6 @@ ErrorCode TasksManager::sort_tasks(TaskGroup& task_group) {
 
             // 寻找下一个最近的点
             double min_dist = -1.0;
-            unsigned int next_id = 0;
             for(const auto& [id, task] : task_group.tasks) {
                 // 跳过已访问的任务
                 if(visited_ids.count(id) > 0) continue;
@@ -317,11 +317,13 @@ ErrorCode TasksManager::sort_tasks(TaskGroup& task_group) {
                 double dist = calculate_dist(task_group.sorted_tasks.back().target, task.target, task_group.weight_orient);
                 if(min_dist < 0 || dist < min_dist) {
                     min_dist = dist;
-                    next_id = id;
+                    cur_id = id;
                 }
             }
-            cur_id = next_id;
         }
+
+        // 使用 2-opt 算法优化路径，进一步减少总距离
+        optimize_with_2opt(task_group.sorted_tasks, task_group.weight_orient);
 
         RCLCPP_INFO(_node_->get_logger(), "任务组已按加权距离排序");
     }
@@ -375,6 +377,44 @@ double TasksManager::calculate_dist(const TargetVariant& base, const TargetVaria
 
     // 综合位置和姿态距离，使用权重进行加权
     return (1.0 - weight_orient) * pos_dist + weight_orient * orient_dist;
+}
+
+/**
+ * @brief 使用 2-opt 算法优化任务执行路径，进一步减少总距离
+ * @param path 需要优化的任务路径，路径中的任务顺序将被修改
+ * @param weight_orient 姿态在距离计算中的权重，范围 [0, 1]，默认为 0.3
+ * @return 无返回值，优化后的路径将直接修改输入的 path 参数
+ */
+void TasksManager::optimize_with_2opt(std::vector<Task>& path, float weight_orient) {
+    bool improved = true;
+    int n = path.size();
+
+    // 如果任务少于4个，2-opt 没有交换空间
+    if(n < 4) return;
+
+    while(improved) {
+        improved = false;
+        for(int i = 0; i < n - 2; ++i) {
+            for(int j = i + 2; j < n - 1; ++j) {
+                // 当前的两条边：(i, i+1) 和 (j, j+1)
+                // 尝试交换为：(i, j) 和 (i+1, j+1)
+
+                // 计算原距离之和
+                double dist1 = calculate_dist(path[i].target, path[i + 1].target, weight_orient);
+                double dist2 = calculate_dist(path[j].target, path[j + 1].target, weight_orient);
+
+                // 计算交换后的新距离之和
+                double dist3 = calculate_dist(path[i].target, path[j].target, weight_orient);
+                double dist4 = calculate_dist(path[i + 1].target, path[j + 1].target, weight_orient);
+
+                if(dist3 + dist4 < dist1 + dist2) {
+                    // 发现更优路径，反转中间这一段 [i+1, j]
+                    std::reverse(path.begin() + i + 1, path.begin() + j + 1);
+                    improved = true;
+                }
+            }
+        }
+    }
 }
 
 }
