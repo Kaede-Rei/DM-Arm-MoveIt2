@@ -383,7 +383,6 @@ double TasksManager::calculate_dist(const TargetVariant& base, const TargetVaria
  * @brief 使用 2-opt 算法优化任务执行路径，进一步减少总距离
  * @param path 需要优化的任务路径，路径中的任务顺序将被修改
  * @param weight_orient 姿态在距离计算中的权重，范围 [0, 1]，默认为 0.3
- * @return 无返回值，优化后的路径将直接修改输入的 path 参数
  */
 void TasksManager::optimize_with_2opt(std::vector<Task>& path, float weight_orient) {
     bool improved = true;
@@ -394,9 +393,9 @@ void TasksManager::optimize_with_2opt(std::vector<Task>& path, float weight_orie
 
     while(improved) {
         improved = false;
-        for(int i = 0; i < n - 2; ++i) {
+        for(int i = 0; i < n - 3; ++i) {
             for(int j = i + 2; j < n - 1; ++j) {
-                // 当前的两条边：(i, i+1) 和 (j, j+1)
+                // 当前的两条边：(i, i+1) 和 (j=i+2, j+1=i+3)
                 // 尝试交换为：(i, j) 和 (i+1, j+1)
 
                 // 计算原距离之和
@@ -408,7 +407,7 @@ void TasksManager::optimize_with_2opt(std::vector<Task>& path, float weight_orie
                 double dist4 = calculate_dist(path[i + 1].target, path[j + 1].target, weight_orient);
 
                 if(dist3 + dist4 < dist1 + dist2) {
-                    // 发现更优路径，反转中间这一段 [i+1, j]
+                    // 发现更优路径，反转中间这一段 [i+1, j+1) 的任务顺序
                     std::reverse(path.begin() + i + 1, path.begin() + j + 1);
                     improved = true;
                 }
