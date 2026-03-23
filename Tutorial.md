@@ -19,6 +19,13 @@ sudo apt install ros-humble-moveit \
 sudo apt install ros-humble-rmw-cyclonedds-cpp
 echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc
 
+# 如果需要导入点云用于避障规划，则安装相关包
+sudo apt install ros-humble-moveit-ros-perception
+sudo apt install ros-humble-moveit-ros-occupancy-map-monitor
+sudo apt install ros-humble-pcl-ros
+sudo apt install ros-humble-depth-image-proc
+sudo apt install ros-humble-perception-pcl
+
 # 验证是否安装成功
 ros2 pkg list | grep moveit
 ```
@@ -91,6 +98,32 @@ ros2 pkg list | grep moveit
     ```
 
 >   *注意 urdf 里所有参数都要用浮点数，原 MoveIt1 可用而 MoveIt2 不可用*
+
+-   **KDL 相关警告：**
+
+    -   `base_link has an inertia specified ... KDL does not support a root link with an inertia` 表示根链接带惯量，建议加个无惯量 `dummy root link` 作为根链接（不改也能用）
+
+        ```xml
+        	<link name="base_link" />
+            <link name="base_body">
+                <!-- 原 base_link 内容，含惯量 -->
+            </link>
+            <joint name="base_joint" type="fixed">
+                <parent link="base_link" />
+                <child link="base_body" />
+                <origin xyz="0 0 0" rpy="0 0 0" />
+            </joint>
+            <link name="link_1">
+                <!-- link_1 内容 -->
+            </link>
+            <joint name="joint1" type="revolute">
+                <origin xyz="0 0 0.0533" rpy="0 0 0" />
+                <parent link="base_body" />
+                <child link="link_1" />
+                <axis xyz="0 0 -1" />
+                <limit lower="-2.0944" upper="2.0944" effort="100" velocity="3" />
+            </joint>
+        ```
 
 ## 3.2. 机器人描述包 + Rviz 验证
 
@@ -265,9 +298,16 @@ ros2 pkg list | grep moveit
 -   `ros2 launch dm_arm_moveit_config demo.launch.py` 验证
 
 >   -   *如果 setup_assistant 加载 urdf file 时报错 QT 相关的错误，需要降级 ros-humble-rviz-common*
+>
 >   -   *如果仍然有 parameter 'robot_description_planning.joint_limits.joint1.max_velocity'*
 >       *has invalid type: expected [double] got [integer] 报错，则在 config/joint_limits.yaml*
 >       *里将整数补齐为浮点数后再构建并 Source*
+>       
+>   -   *如果有 No action namespace specified for controller ... through parameter ... 报错，需要*
+>
+>       *在 \<robot-name\>_moveit_config/config/moveit_controller.yaml 里的每个 controller 里添加：*
+>
+>       *action_ns: ...(对应你的配置，如 follow_joint_trajectory)*
 
 ### 3.3.2. MoveIt Setup Assistant 其他可选选项
 
